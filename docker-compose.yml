@@ -1,0 +1,33 @@
+services:
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
+  api:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - PORT=3000
+    depends_on:
+      - redis
+
+  worker:
+    build: ./server
+    command: npm run worker
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - redis
+
+  client:
+    build: ./client
+    ports:
+      - "80:80"
+    depends_on:
+      - api
