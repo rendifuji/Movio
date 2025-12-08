@@ -30,6 +30,8 @@ services:
   client:
     build: ./client
     image: ghcr.io/rendifuji/movio-client:latest
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
     ports:
       - "80:80"
       - "443:443"
