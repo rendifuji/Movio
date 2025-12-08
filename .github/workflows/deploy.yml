@@ -1,0 +1,55 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push images
+        run: |
+          REPO_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          
+          docker build -t ghcr.io/$REPO_LOWER-client:latest ./client
+          docker push ghcr.io/$REPO_LOWER-client:latest
+          
+          docker build -t ghcr.io/$REPO_LOWER-server:latest ./server
+          docker push ghcr.io/$REPO_LOWER-server:latest
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            REPO_LOWER=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+            
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            
+            mkdir -p ~/movio
+            cd ~/movio
+            
+            git pull origin main || git clone https://github.com/${{ github.repository }}.git .
+            
+            docker compose pull
+            
+            docker compose up -d --remove-orphans
