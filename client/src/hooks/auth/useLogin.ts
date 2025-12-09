@@ -11,6 +11,7 @@ export const useLogin = () => {
       localStorage.setItem("authToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("authRole", data.user.role);
+      localStorage.setItem("authUser", JSON.stringify(data.user));
       navigate(data.user.role === "admin" ? "/admin" : "/");
     },
   });
