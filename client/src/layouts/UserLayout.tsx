@@ -9,7 +9,7 @@ const UserLayout = () => {
         </div>
       </header>
 
-      <main className="flex-1 p-6 container mx-auto">
+      <main className="flex-1 container">
         <Outlet />
       </main>
 
