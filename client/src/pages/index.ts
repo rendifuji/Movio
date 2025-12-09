@@ -1,0 +1,11 @@
+export { default as NotFound } from "./NotFound";
+export { default as Login } from "./Login";
+export { default as Home } from "./user/Home";
+export { default as MovieDetails } from "./user/MovieDetails";
+export { default as BookSeats } from "./user/BookSeats";
+export { default as Checkout } from "./user/Checkout";
+export { default as MyTickets } from "./user/MyTickets";
+export { default as TicketDetail } from "./user/TicketDetail";
+export { default as AdminDashboard } from "./admin/Dashboard";
+export { default as AdminMovies } from "./admin/Movies";
+export { default as AdminSchedules } from "./admin/Schedules";
