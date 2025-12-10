@@ -1,15 +1,16 @@
 import { cn } from "@/lib/utils";
 import { Google, LoginImage } from "@/assets/images";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
+  Button,
+  Card,
+  CardContent,
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+  Input,
+} from "@/components";
 import { useState } from "react";
 import { useLogin } from "@/hooks/auth/useLogin";
 

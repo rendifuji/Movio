@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Outlet } from "react-router";
 import { Search } from "lucide-react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components";
 import { Person } from "@/assets/images";
 
 const NAV_LINKS = [
@@ -91,7 +91,7 @@ const UserLayout = () => {
         </div>
       </header>
 
-      <main className="flex-1 p-6 container mx-auto">
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>
