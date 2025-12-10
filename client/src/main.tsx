@@ -4,7 +4,7 @@ import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserLayout, AdminLayout } from "./layouts";
-import ProtectedRoute from "./components/general/ProtectedRoute";
+import { ProtectedRoute, PageTitle } from "@/components";
 import {
   Login,
   NotFound,
@@ -18,7 +18,6 @@ import {
   TicketDetail,
   AdminSchedules,
 } from "./pages";
-import PageTitle from "./components/general/PageTitle";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
