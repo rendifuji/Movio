@@ -82,27 +82,26 @@ createRoot(document.getElementById("root")!).render(
                 </ProtectedRoute>
               }
             />
-          </Route>
-
-          <Route
-            path="/movie/:movieId"
-            element={
-              <PageTitle title="Movie Details | Movio">
-                <MovieDetails />
-              </PageTitle>
-            }
-          />
-
-          <Route
-            path="/book/:movieId"
-            element={
-              <ProtectedRoute allowedRoles={["user"]}>
-                <PageTitle title="Book Seats | Movio">
-                  <BookSeats />
+            <Route
+              path="/movie/:movieId"
+              element={
+                <PageTitle title="Movie Details | Movio">
+                  <MovieDetails />
                 </PageTitle>
-              </ProtectedRoute>
-            }
-          />
+              }
+            />
+
+            <Route
+              path="/book/:movieId"
+              element={
+                <ProtectedRoute allowedRoles={["user"]}>
+                  <PageTitle title="Book Seats | Movio">
+                    <BookSeats />
+                  </PageTitle>
+                </ProtectedRoute>
+              }
+            />
+          </Route>
 
           <Route
             path="/admin"
