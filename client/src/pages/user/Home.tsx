@@ -1,6 +1,7 @@
 import { MovieBanner } from "@/assets/images";
 import { Star } from "lucide-react";
 import { Button, CategoryPicker } from "@/components";
+import { Link } from "react-router";
 
 const featuredMovie = {
   title: "Zootopia 2",
@@ -85,6 +86,14 @@ const Home = () => {
             ))}
           </div>
           <div className="flex flex-wrap gap-4">
+            <Link
+              to="/movie/2"
+              aria-label={`View details for ${featuredMovie.title}`}
+            >
+              <Button className="rounded-md px-12 py-3 bg-transparent border border-primary! text-foreground hover:bg-muted">
+                View Details
+              </Button>
+            </Link>
             <Button className="w-fit px-12">Book Now</Button>
           </div>
         </div>
