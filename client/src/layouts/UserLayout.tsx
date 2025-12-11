@@ -91,7 +91,7 @@ const UserLayout = () => {
         </div>
       </header>
 
-      <main className="flex-1 container">
+      <main className="flex-1 container ">
         <Outlet />
       </main>
     </div>
