@@ -34,7 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import AddMovieModal from "@/components/admin/AddMovieModal";
+import { AddMovieModal } from "@/components/admin";
 
 type MovieStatus = "Now Showing" | "Coming Soon" | "End";
 

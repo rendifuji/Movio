@@ -209,12 +209,24 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
 
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="duration">Duration</Label>
-                  <Input
-                    id="duration"
-                    placeholder="160m"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="duration"
+                      inputMode="numeric"
+                      placeholder="160m"
+                      value={duration}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, "");
+                        setDuration(raw);
+                      }}
+                      className={duration ? "pr-8" : ""}
+                    />
+                    {duration && (
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-foreground pointer-events-none select-none">
+                        m
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -354,7 +366,7 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
                   <Upload className="size-16 text-foreground mb-2" />
                   <p className="text-sm font-medium">Upload Poster</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    File must be .png or .jpg and not exceed 2mb
+                    File must be .png or .jpg and not exceed 2MB
                   </p>
                 </div>
               )}

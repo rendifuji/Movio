@@ -19,6 +19,7 @@ import {
   Label,
   Slider,
 } from "@/components";
+import { AddScheduleModal } from "@/components/admin";
 
 type Schedule = {
   id: string;
@@ -180,6 +181,7 @@ const columns = [
 
 const Schedules = () => {
   const data = useMemo(() => schedules, []);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<string>("");
   const [filterLocation, setFilterLocation] = useState<string>("");
@@ -340,11 +342,16 @@ const Schedules = () => {
           </Popover>
         </div>
 
-        <Button className="gap-2 px-10! py-3!">
+        <Button
+          className="gap-2 px-10! py-3!"
+          onClick={() => setAddModalOpen(true)}
+        >
           <Plus className="size-6" />
           Create Schedule
         </Button>
       </div>
+
+      <AddScheduleModal open={addModalOpen} onOpenChange={setAddModalOpen} />
 
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full text-sm">
