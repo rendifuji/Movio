@@ -77,6 +77,30 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const resetForm = useCallback(() => {
+    setTitle("");
+    setDescription("");
+    setReleaseDate("");
+    setDuration("");
+    setSelectedGenres([]);
+    setStatus("");
+    setGenrePopoverOpen(false);
+    setPosterFile(null);
+    setPosterPreview(null);
+    setIsDragging(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, []);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        resetForm();
+      }
+      onOpenChange(nextOpen);
+    },
+    [onOpenChange, resetForm]
+  );
+
   const handleFile = useCallback((file: File | null) => {
     if (!file) return;
 
@@ -94,6 +118,12 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
     setPosterFile(file);
     const reader = new FileReader();
     reader.onload = () => setPosterPreview(reader.result as string);
+    reader.onerror = (err) => {
+      console.error("FileReader error:", err);
+      setPosterFile(null);
+      setPosterPreview(null);
+      alert("Failed to read file. Please try again.");
+    };
     reader.readAsDataURL(file);
   }, []);
 
@@ -158,7 +188,7 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-4xl p-6" showCloseButton>
         <DialogHeader>
           <DialogTitle className="text-xl">Add New Movie</DialogTitle>

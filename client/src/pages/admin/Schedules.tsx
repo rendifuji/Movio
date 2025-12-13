@@ -323,7 +323,7 @@ const Schedules = () => {
                     onClick={() => {
                       setFilterLocation("");
                       setFilterStudio("");
-                      setPriceRange([0, 100000]);
+                      setPriceRange([0, 200000]);
                     }}
                   >
                     Reset

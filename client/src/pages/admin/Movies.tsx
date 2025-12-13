@@ -428,7 +428,7 @@ const Movies = () => {
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    className="px-6 py-4 text-left font-medium text -foreground"
+                    className="px-6 py-4 text-left font-medium text-foreground"
                   >
                     {header.isPlaceholder
                       ? null
