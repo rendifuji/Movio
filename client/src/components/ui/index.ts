@@ -25,6 +25,12 @@ export {
 export { Input } from "./input";
 export { Label } from "./label";
 export {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverAnchor,
+} from "./popover";
+export {
   Select,
   SelectContent,
   SelectGroup,
@@ -63,3 +69,4 @@ export {
   SidebarTrigger,
   useSidebar,
 } from "./sidebar";
+export { Slider } from "./slider";
