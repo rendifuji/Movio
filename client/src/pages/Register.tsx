@@ -12,19 +12,28 @@ import {
   Input,
 } from "@/components";
 import { useState } from "react";
-import { useLogin } from "@/hooks/auth/useLogin";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 
-function Login({ className, ...props }: React.ComponentProps<"div">) {
+function Register({ className, ...props }: React.ComponentProps<"div">) {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, isLoggingIn, error } = useLogin();
-  const navigate = useNavigate();
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    login({ email, password });
-    navigate("/");
+    setIsRegistering(true);
+    setError(null);
+
+    try {
+      console.log({ fullName, email, password });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to register");
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   return (
@@ -40,11 +49,22 @@ function Login({ className, ...props }: React.ComponentProps<"div">) {
               >
                 <FieldGroup>
                   <div className="flex flex-col items-center gap-1 text-center">
-                    <h1 className="text-3xl font-bold">Welcome back</h1>
+                    <h1 className="text-3xl font-bold">Create an account</h1>
                     <p className="text-muted-foreground text-balance">
-                      Login to Movio
+                      Sign up for Movio
                     </p>
                   </div>
+                  <Field>
+                    <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="John Doe"
+                      value={fullName}
+                      onChange={(event) => setFullName(event.target.value)}
+                      required
+                    />
+                  </Field>
                   <Field>
                     <FieldLabel htmlFor="email">Email</FieldLabel>
                     <Input
@@ -57,15 +77,7 @@ function Login({ className, ...props }: React.ComponentProps<"div">) {
                     />
                   </Field>
                   <Field>
-                    <div className="flex items-center">
-                      <FieldLabel htmlFor="password">Password</FieldLabel>
-                      <a
-                        href="#"
-                        className="ml-auto text-sm underline-offset-2 hover:underline"
-                      >
-                        Forgot your password?
-                      </a>
-                    </div>
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
                     <Input
                       id="password"
                       type="password"
@@ -75,16 +87,10 @@ function Login({ className, ...props }: React.ComponentProps<"div">) {
                       required
                     />
                   </Field>
-                  {error && (
-                    <p className="text-sm text-destructive">
-                      {error instanceof Error
-                        ? error.message
-                        : "Unable to log in"}
-                    </p>
-                  )}
+                  {error && <p className="text-sm text-destructive">{error}</p>}
                   <Field>
-                    <Button type="submit" disabled={isLoggingIn}>
-                      {isLoggingIn ? "Logging in…" : "Login"}
+                    <Button type="submit" disabled={isRegistering}>
+                      {isRegistering ? "Creating account…" : "Sign Up"}
                     </Button>
                   </Field>
                   <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
@@ -93,11 +99,11 @@ function Login({ className, ...props }: React.ComponentProps<"div">) {
                   <Field className="grid">
                     <Button variant="outline" type="button">
                       <img src={Google} alt="Google logo" />
-                      <span className="">Login with Google</span>
+                      <span>Sign up with Google</span>
                     </Button>
                   </Field>
                   <FieldDescription className="text-center">
-                    Don&apos;t have an account? <Link to="/register">Sign Up</Link>
+                    Already have an account? <Link to="/login">Login</Link>
                   </FieldDescription>
                 </FieldGroup>
               </form>
@@ -120,4 +126,4 @@ function Login({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-export default Login;
+export default Register;

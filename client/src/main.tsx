@@ -7,6 +7,7 @@ import { UserLayout, AdminLayout } from "./layouts";
 import { ProtectedRoute, PageTitle } from "@/components";
 import {
   Login,
+  Register,
   NotFound,
   AdminDashboard,
   Home,
@@ -39,6 +40,14 @@ createRoot(document.getElementById("root")!).render(
             element={
               <PageTitle title="Login | Movio">
                 <Login />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PageTitle title="Register | Movio">
+                <Register />
               </PageTitle>
             }
           />
