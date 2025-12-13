@@ -1,4 +1,5 @@
 export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
+export { Badge, badgeVariants } from "./badge";
 export { Button } from "./button";
 export {
   Card,
@@ -9,6 +10,18 @@ export {
   CardDescription,
   CardContent,
 } from "./card";
+export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "./dialog";
 export {
   Field,
   FieldLabel,
@@ -24,6 +37,12 @@ export {
 export { Input } from "./input";
 export { Label } from "./label";
 export {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverAnchor,
+} from "./popover";
+export {
   Select,
   SelectContent,
   SelectGroup,
@@ -36,3 +55,31 @@ export {
   SelectValue,
 } from "./select";
 export { Separator } from "./separator";
+export {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInput,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
+} from "./sidebar";
+export { Slider } from "./slider";
+export { Textarea } from "./textarea";
