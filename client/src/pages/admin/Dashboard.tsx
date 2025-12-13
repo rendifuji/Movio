@@ -176,7 +176,7 @@ const AdminDashboard = () => {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-6 py-4 text-left font-medium text-muted-foreground"
+                      className="px-6 py-4 text-left font-medium text-foreground"
                     >
                       {header.isPlaceholder
                         ? null
