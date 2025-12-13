@@ -11,6 +11,18 @@ export {
   CardContent,
 } from "./card";
 export {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
+} from "./dialog";
+export {
   Field,
   FieldLabel,
   FieldDescription,
@@ -70,3 +82,4 @@ export {
   useSidebar,
 } from "./sidebar";
 export { Slider } from "./slider";
+export { Textarea } from "./textarea";

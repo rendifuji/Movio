@@ -34,6 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import AddMovieModal from "@/components/admin/AddMovieModal";
 
 type MovieStatus = "Now Showing" | "Coming Soon" | "End";
 
@@ -256,6 +257,7 @@ const Movies = () => {
   const [filterGenre, setFilterGenre] = useState<string>("");
   const [ratingRange, setRatingRange] = useState<number[]>([0, 10]);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   const filteredData = useMemo(() => {
     return data.filter((m) => {
@@ -407,11 +409,16 @@ const Movies = () => {
           </Popover>
         </div>
 
-        <Button className="gap-2 px-10! py-3!">
+        <Button
+          className="gap-2 px-10! py-3!"
+          onClick={() => setAddModalOpen(true)}
+        >
           <Plus className="size-6" />
           Add Movie
         </Button>
       </div>
+
+      <AddMovieModal open={addModalOpen} onOpenChange={setAddModalOpen} />
 
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full text-sm">
