@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { adminMovieRouter } from "./routes/movieRoute.js";
+import { userRouter } from "./routes/userRoute.js";
 import authRouter from "./routes/authRoute.js";
 
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(cookieParser());
 
 app.use("/api/admin/movie", adminMovieRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 
 app.get("/", (req, res) => {
 	res.send("Test");

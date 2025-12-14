@@ -51,17 +51,6 @@ class AuthMiddleware {
 		}
 		next();
 	}
-
-	static adminOrUser(req: Request, res: Response, next: NextFunction) {
-		const validationReq = req as ValidationRequest;
-		if (
-			validationReq.user?.role !== "ADMIN" &&
-			validationReq.user?.role !== "USER"
-		) {
-			return errForbidden(res, "Admin or user access required");
-		}
-		next();
-	}
 }
 
 export default AuthMiddleware;

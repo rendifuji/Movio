@@ -1,4 +1,3 @@
-import AuthRepository from "../repositories/authRepository.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import type { Request, Response } from "express";
@@ -6,6 +5,7 @@ import type { TokenPayload } from "../types/authType.js";
 import { env } from "../lib/env.js";
 import { getGoogleAuthUrl, getGoogleUserInfo } from "../lib/googleAuth.js";
 import { UserRole } from "@prisma/client";
+import UserRepository from "../repositories/userRepository.js";
 
 class AuthService {
 	private static generateTokens(payload: TokenPayload, res: Response) {
@@ -30,7 +30,7 @@ class AuthService {
 	}
 
 	static async handleLogin(email: string, password: string, res: Response) {
-		const user = await AuthRepository.findUserByEmail(email);
+		const user = await UserRepository.getUserByEmail(email);
 
 		if (!user) {
 			throw new Error("Email not found");
@@ -107,10 +107,10 @@ class AuthService {
 				throw new Error("Failed to get user email from Google");
 			}
 
-			let user = await AuthRepository.findUserByEmail(googleUser.email);
+			let user = await UserRepository.getUserByEmail(googleUser.email);
 
 			if (!user) {
-				user = await AuthRepository.createUser({
+				user = await UserRepository.createUser({
 					email: googleUser.email,
 					name: googleUser.name || "Google User",
 					role: UserRole.USER,
