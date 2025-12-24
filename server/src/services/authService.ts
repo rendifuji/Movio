@@ -46,7 +46,7 @@ class AuthService {
 			id: user.userId,
 			name: user.name,
 			email: user.email,
-			role: user.role.toLowerCase(),
+			role: user.role,
 		};
 
 		return this.generateTokens(payload, res);

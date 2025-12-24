@@ -2,7 +2,19 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import { adminMovieRouter } from "./routes/movieRoute.js";
+import { adminMovieRouter, userMovieRouter } from "./routes/movieRoute.js";
+import {
+	adminScheduleRouter,
+	userScheduleRouter,
+} from "./routes/scheduleRoute.js";
+import {
+	adminCinemaRouter,
+	userCinemaRouter,
+} from "./routes/cinemaRoute.js";
+import {
+	adminStudioRouter,
+	userStudioRouter,
+} from "./routes/studioRoute.js";
 import { userRouter } from "./routes/userRoute.js";
 import authRouter from "./routes/authRoute.js";
 
@@ -13,9 +25,16 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(cookieParser()); 
+app.use(cookieParser());
 
-app.use("/api/admin/movie", adminMovieRouter);
+app.use("/api/movie/admin", adminMovieRouter);
+app.use("/api/movie/user", userMovieRouter);
+app.use("/api/schedule/admin", adminScheduleRouter);
+app.use("/api/schedule/user", userScheduleRouter);
+app.use("/api/cinema/admin", adminCinemaRouter);
+app.use("/api/cinema/user", userCinemaRouter);
+app.use("/api/studio/admin", adminStudioRouter);
+app.use("/api/studio/user", userStudioRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 

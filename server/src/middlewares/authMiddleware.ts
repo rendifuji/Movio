@@ -44,10 +44,13 @@ class AuthMiddleware {
 		next();
 	}
 
-	static userOnly(req: Request, res: Response, next: NextFunction) {
+	static userOrAdmin(req: Request, res: Response, next: NextFunction) {
 		const validationReq = req as ValidationRequest;
-		if (validationReq.user?.role !== "USER") {
-			return errForbidden(res, "User access required");
+		if (
+			validationReq.user?.role !== "USER" &&
+			validationReq.user?.role !== "ADMIN"
+		) {
+			return errForbidden(res, "Access denied");
 		}
 		next();
 	}

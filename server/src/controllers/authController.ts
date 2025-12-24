@@ -82,28 +82,17 @@ class AuthController {
 
 	static async googleCallback(req: Request, res: Response) {
 		try {
-			console.log("🔵 [GoogleCallback] Starting callback handler");
-			console.log("🔵 [GoogleCallback] Query params:", req.query);
-
 			const { code } = req.query;
 
 			if (!code || typeof code !== "string") {
-				console.log("❌ [GoogleCallback] No authorization code found");
 				return errBadRequest(res, "Authorization code is required");
 			}
 
-			console.log("✅ [GoogleCallback] Code received, processing...");
 			const result = await AuthService.handleGoogleCallback(code, res);
-			console.log("✅ [GoogleCallback] Success! Result:", result);
 
 			return successRes(res, result, "Google login successful");
 		} catch (error) {
-			console.error("❌ [GoogleCallback] Error caught:", error);
-
 			if (error instanceof Error) {
-				console.error("❌ [GoogleCallback] Error message:", error.message);
-				console.error("❌ [GoogleCallback] Error stack:", error.stack);
-
 				if (error.message === "Google OAuth authentication failed") {
 					return errUnauthenticated(res, "Google authentication failed");
 				}
