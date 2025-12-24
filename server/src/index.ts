@@ -7,16 +7,11 @@ import {
 	adminScheduleRouter,
 	userScheduleRouter,
 } from "./routes/scheduleRoute.js";
-import {
-	adminCinemaRouter,
-	userCinemaRouter,
-} from "./routes/cinemaRoute.js";
-import {
-	adminStudioRouter,
-	userStudioRouter,
-} from "./routes/studioRoute.js";
+import { adminCinemaRouter, userCinemaRouter } from "./routes/cinemaRoute.js";
+import { adminStudioRouter, userStudioRouter } from "./routes/studioRoute.js";
 import { userRouter } from "./routes/userRoute.js";
 import authRouter from "./routes/authRoute.js";
+import { setupSwagger } from "./config/swagger.js";
 
 dotenv.config();
 
@@ -26,6 +21,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+
+// Setup Swagger API Documentation
+setupSwagger(app);
 
 app.use("/api/movie/admin", adminMovieRouter);
 app.use("/api/movie/user", userMovieRouter);
