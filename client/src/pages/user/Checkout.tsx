@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Zootopia } from "@/assets/images";
 
-// Mock data - replace with actual data from API/state
+//Hardcode
 const mockCheckoutData = {
   movie: {
     id: "1",
@@ -48,7 +48,6 @@ const Checkout = () => {
   const totalPrice = selectedSeats.length * pricePerSeat;
 
   const handleCheckout = () => {
-    // Handle checkout logic
     console.log("Processing checkout for movie:", movieId);
   };
 
@@ -64,10 +63,8 @@ const Checkout = () => {
           <ArrowLeft className="size-5" />
         </Button>
 
-        {/* Main Content */}
         <Card className="mx-auto max-w-4xl border-border/40 bg-card/80 px-6 py-8 shadow-xl md:px-10">
           <div className="flex flex-col gap-8 md:flex-row md:gap-12">
-            {/* Movie Poster */}
             <div className="shrink-0">
               <div className="overflow-hidden rounded-3xl border border-white/5 shadow-lg">
                 <img
@@ -77,7 +74,6 @@ const Checkout = () => {
                 />
               </div>
 
-              {/* Schedule Info - Below Poster */}
               <div className="mt-6 space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-3">
                   <Calendar className="size-4" />
@@ -92,14 +88,12 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Movie Details & Pricing */}
             <div className="flex-1">
-              {/* Movie Title */}
+
               <h1 className="mb-5 text-4xl font-semibold text-foreground">
                 {movie.title}
               </h1>
 
-              {/* Movie Meta Info */}
               <div className="mb-7 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Clock className="size-4" />
@@ -114,12 +108,10 @@ const Checkout = () => {
                 </span>
               </div>
 
-              {/* Seats Info */}
               <div className="mb-4 text-sm text-muted-foreground">
                 {selectedSeats.length} Seats - {selectedSeats.join(", ")}
               </div>
 
-              {/* Price per Seat */}
               <div className="mb-6 flex items-center gap-4 text-sm">
                 <span className="text-muted-foreground">Price/Seat</span>
                 <div className="flex-1 border-t border-dashed border-border/40" />
@@ -130,7 +122,6 @@ const Checkout = () => {
 
               <div className="mb-6 h-px bg-border/30" />
 
-              {/* Total */}
               <div className="mb-10 flex items-start justify-between">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Ticket className="size-4 text-primary" />
@@ -146,7 +137,6 @@ const Checkout = () => {
                 </div>
               </div>
 
-              {/* Checkout Button */}
               <Button
                 className="w-full rounded-lg py-5 text-base font-semibold md:ml-auto md:flex md:w-auto md:min-w-[170px]"
                 onClick={handleCheckout}
@@ -157,7 +147,6 @@ const Checkout = () => {
           </div>
         </Card>
       </div>
-      {/* Back Button */}
       
     </div>
   );
