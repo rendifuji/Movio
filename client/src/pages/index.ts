@@ -1,5 +1,6 @@
 export { default as NotFound } from "./NotFound";
 export { default as Login } from "./Login";
+export { default as Register } from "./Register";
 export { default as Home } from "./user/Home";
 export { default as MovieDetails } from "./user/MovieDetails";
 export { default as BookSeats } from "./user/BookSeats";

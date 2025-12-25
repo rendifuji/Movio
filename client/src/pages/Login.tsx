@@ -1,26 +1,30 @@
 import { cn } from "@/lib/utils";
 import { Google, LoginImage } from "@/assets/images";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
+  Button,
+  Card,
+  CardContent,
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+  Input,
+} from "@/components";
 import { useState } from "react";
 import { useLogin } from "@/hooks/auth/useLogin";
+import { Link, useNavigate } from "react-router";
 
 function Login({ className, ...props }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoggingIn, error } = useLogin();
+  const navigate = useNavigate();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     login({ email, password });
+    navigate("/");
   };
 
   return (
@@ -93,7 +97,7 @@ function Login({ className, ...props }: React.ComponentProps<"div">) {
                     </Button>
                   </Field>
                   <FieldDescription className="text-center">
-                    Don&apos;t have an account? <a href="#">Sign up</a>
+                    Don&apos;t have an account? <Link to="/register">Sign Up</Link>
                   </FieldDescription>
                 </FieldGroup>
               </form>
