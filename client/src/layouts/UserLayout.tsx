@@ -91,7 +91,11 @@ const UserLayout = () => {
         </div>
       </header>
 
+<<<<<<< HEAD
       <main className="flex flex-1 overflow-x-hidden">
+=======
+      <main className="flex-1 container">
+>>>>>>> 9d146dd (Minor Change)
         <Outlet />
       </main>
     </div>
