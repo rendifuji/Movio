@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 import type { AuthUser, LoginResponse } from "@/types/auth";
 
-export const BASE_URL = import.meta.env.VITE_API_URL || "";
+export const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 type RetryableRequest = AxiosRequestConfig & { _retry?: boolean };
 
