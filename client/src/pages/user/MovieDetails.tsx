@@ -1,50 +1,54 @@
 import { useState } from "react";
-import { MovieBanner, MoviePoster, Person } from "@/assets/images";
 import {
   Calendar,
   Clock,
   Film,
-  Star,
   Ticket,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { Avatar, AvatarImage, Button } from "@/components";
+import { Button } from "@/components";
 import { Link, useParams } from "react-router";
+import { useMovie, useMovies } from "@/hooks/movie";
 
-const movie = {
-  title: "Zootopia 2",
-  releaseDate: "5 December 2025",
-  duration: "2h 30m",
-  genre: "Fantasy",
-  rating: "PG-13",
-  poster: MoviePoster,
-  backdrop: MovieBanner,
-  description:
-    "Months after the events that reshaped Zootopia, Officer Judy Hopps and Nick Wilde have settled into an uneasy partnership. When a string of disappearances and a shadowy syndicate begin to unsettle the city, Judy and Nick must navigate old rivalries, new alliances, and a metropolis still learning to trust across species lines. As secrets surface and the stakes escalate, the pair uncover a conspiracy that could change Zootopia forever—if they can't outsmart the past.",
-};
-
-const actors = [
-  { name: "Derry R.", image: Person },
-  { name: "Rendi F.", image: Person },
-  { name: "Heinrich", image: Person },
-];
-
-const similarMovies = [
-  { title: "Zootopia 2", rating: "4.5", image: MovieBanner },
-  { title: "Zootopia 2", rating: "4.5", image: MovieBanner },
-  { title: "Zootopia 2", rating: "4.5", image: MovieBanner },
-  { title: "Zootopia 2", rating: "4.5", image: MovieBanner },
-];
+import { formatDuration, formatGenre, formatDate } from "@/lib/formatters";
 
 const MovieDetails = () => {
   const { movieId } = useParams<{ movieId: string }>();
+  const { movie, isLoading } = useMovie(movieId);
+  const { movies: otherMovies } = useMovies({
+    status: "NOW_SHOWING",
+    limit: 4,
+  });
   const [expanded, setExpanded] = useState(false);
-  const isLong = movie.description.length > 220;
+
+  const filteredOtherMovies = otherMovies.filter((m) => m.movieId !== movieId);
+
+  const description = movie?.description || "";
+  const isLong = description.length > 220;
 
   const paragraphClass = expanded
     ? "text-base leading-relaxed text-slate-200 max-h-[1000px] transition-[max-height] duration-500 ease-in-out"
     : "text-base leading-relaxed text-slate-200 overflow-hidden line-clamp-3 max-h-[4.5rem] transition-[max-height] duration-300 ease-in-out";
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#030b1b] text-white flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-12 w-64 bg-slate-700 rounded" />
+          <div className="h-6 w-48 bg-slate-700 rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!movie) {
+    return (
+      <div className="min-h-screen bg-[#030b1b] text-white flex items-center justify-center">
+        <p className="text-lg text-slate-400">Movie not found</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#030b1b] text-white">
@@ -52,20 +56,28 @@ const MovieDetails = () => {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url(${movie.backdrop})`,
+            ...(movie.posterUrl
+              ? { backgroundImage: `url(${movie.posterUrl})` }
+              : { backgroundColor: "rgba(3,11,27,0.6)" }),
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         />
         <div className="absolute inset-0 bg-linear-to-b from-[#030b1b]/40 to-[#030b1b]" />
 
-        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16 sm:flex-row sm:items-start sm:px-10">
+        <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16 sm:flex-row sm:items-center sm:px-10">
           <div className="shrink-0 w-80 overflow-hidden rounded-xl shadow-lg">
-            <img
-              src={movie.poster}
-              alt={movie.title}
-              className="h-full w-full object-cover"
-            />
+            {movie.posterUrl ? (
+              <img
+                src={movie.posterUrl}
+                alt={movie.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-slate-700 flex items-center justify-center text-slate-400">
+                No Poster
+              </div>
+            )}
           </div>
 
           <div className="flex flex-1 flex-col gap-4">
@@ -73,7 +85,7 @@ const MovieDetails = () => {
 
             <div className="flex flex-col">
               <div className="relative max-w-2xl">
-                <p className={paragraphClass}>{movie.description}</p>
+                <p className={paragraphClass}>{description}</p>
                 {!expanded && isLong && (
                   <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10" />
                 )}
@@ -98,34 +110,18 @@ const MovieDetails = () => {
 
             <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-slate-300">
               <span className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" /> {movie.releaseDate}
+                <Calendar className="h-4 w-4" /> {formatDate(movie.releaseDate)}
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4" /> {movie.duration}
+                <Clock className="h-4 w-4" />{" "}
+                {formatDuration(movie.durationMinutes)}
               </span>
               <span className="flex items-center gap-1">
-                <Film className="h-4 w-4" /> {movie.genre}
+                <Film className="h-4 w-4" /> {formatGenre(movie.genre)}
               </span>
               <span className="rounded bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
                 {movie.rating}
               </span>
-            </div>
-
-            <div className="mt-4 flex flex-col gap-2">
-              <p className="text-sm font-semibold text-slate-100">Actors</p>
-              <div className="flex items-center gap-4">
-                {actors.slice(0, 4).map((actor) => (
-                  <div
-                    key={actor.name}
-                    className="flex flex-col items-center gap-1 text-xs text-slate-300"
-                  >
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={actor.image} alt={actor.name} />
-                    </Avatar>
-                    <span>{actor.name}</span>
-                  </div>
-                ))}
-              </div>
             </div>
 
             <Link to={`/book/${movieId}`} className="mt-4">
@@ -137,37 +133,36 @@ const MovieDetails = () => {
         </div>
       </section>
 
-      <div className="flex w-full flex-col gap-6 px-30 py-16">
-        <section className="flex flex-col gap-4">
-          <h3 className="text-2xl font-bold text-white">Similar Movies</h3>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {similarMovies.map((movie) => (
-              <article
-                key={`${movie.title}-${movie.image}`}
-                className="cursor-pointer flex flex-col gap-4 rounded-xl bg-card border border-border shadow-[0_20px_40px_rgba(2,6,23,0.65)]"
-              >
-                <div className="h-80 w-full overflow-hidden rounded-t-xl">
-                  <img
-                    src={movie.image}
-                    alt={movie.title}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="flex mb-6 flex-col justify-between px-6 text-xl text-card-foreground">
-                  <span>{movie.title}</span>
-                  <span className="flex items-center text-lg text-primary">
-                    <Star
-                      className="inline-block mr-1 text-amber-500"
-                      fill="currentColor"
-                    />{" "}
-                    {movie.rating}
-                  </span>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      </div>
+      {filteredOtherMovies.length > 0 && (
+        <div className="flex w-full flex-col gap-6 px-30 py-16">
+          <section className="flex flex-col gap-4">
+            <h3 className="text-2xl font-bold text-white">Other Movies</h3>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredOtherMovies.slice(0, 4).map((m) => (
+                <Link
+                  key={m.movieId}
+                  to={`/movie/${m.movieId}`}
+                  className="cursor-pointer flex flex-col gap-4 rounded-xl bg-card border border-border shadow-[0_20px_40px_rgba(2,6,23,0.65)] transition hover:scale-[1.02]"
+                >
+                  <div className="h-80 w-full overflow-hidden rounded-t-xl">
+                    <img
+                      src={m.posterUrl}
+                      alt={m.title}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="flex mb-6 flex-col justify-between px-6 text-xl text-card-foreground">
+                    <span>{m.title}</span>
+                    <span className="flex items-center text-lg text-primary">
+                      {m.rating}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 };
