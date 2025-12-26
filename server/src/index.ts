@@ -2,7 +2,11 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import { adminMovieRouter, userMovieRouter } from "./routes/movieRoute.js";
+import {
+  adminMovieRouter,
+  userMovieRouter,
+  publicMovieRouter,
+} from "./routes/movieRoute.js";
 import {
 	adminScheduleRouter,
 	userScheduleRouter,
@@ -32,6 +36,7 @@ setupSwagger(app);
 
 app.use("/api/movie/admin", adminMovieRouter);
 app.use("/api/movie/user", userMovieRouter);
+app.use("/api/movie", publicMovieRouter);
 app.use("/api/schedule/admin", adminScheduleRouter);
 app.use("/api/schedule/user", userScheduleRouter);
 app.use("/api/cinema/admin", adminCinemaRouter);

@@ -123,6 +123,7 @@ class MovieRepository {
 				description: true,
 				durationMinutes: true,
 				posterUrl: true,
+				genre: true,
 				rating: true,
 				status: true,
 			},

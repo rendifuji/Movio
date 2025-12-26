@@ -6,6 +6,10 @@ import type {
 } from "../types/movieType.js";
 
 class MovieService {
+	  static async getMovieById(movieId: string) {
+    return await MovieRepository.getMovieById(movieId);
+  }
+
 	static async createMovie(data: CreateMovieRequest) {
 		// Validate duration
 		if (data.durationMinutes <= 0) {

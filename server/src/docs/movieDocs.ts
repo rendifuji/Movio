@@ -450,6 +450,61 @@
  *               success: false
  *               message: "Internal server error"
  *               error: {}
+ *
+ * @swagger
+ * /api/movie/{movieId}:
+ *   get:
+ *     summary: Get a movie by ID (Public)
+ *     description: Retrieve a single movie by ID. No authentication required.
+ *     tags: [Movies (Public)]
+ *     parameters:
+ *       - in: path
+ *         name: movieId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Movie ID
+ *         example: "550e8400-e29b-41d4-a716-446655440000"
+ *     responses:
+ *       200:
+ *         description: Movie retrieved successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 200
+ *               success: true
+ *               message: "Movie found"
+ *               data:
+ *                 movieId: "550e8400-e29b-41d4-a716-446655440000"
+ *                 title: "A Time for Bravery"
+ *                 description: "A psychoanalyst on community service aids an agent shattered by infidelity..."
+ *                 releaseDate: "2025-12-19T00:00:00.000Z"
+ *                 durationMinutes: 107
+ *                 genre: "DRAMA"
+ *                 posterUrl: "https://image.tmdb.org/t/p/w500/example.jpg"
+ *                 rating: "PG-13"
+ *                 status: "NOW_SHOWING"
+ *                 createdAt: "2025-12-10T10:00:00.000Z"
+ *                 updatedAt: "2025-12-10T10:00:00.000Z"
+ *       404:
+ *         description: Movie not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 404
+ *               success: false
+ *               message: "Movie not found"
+ *               error: null
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               status: 500
+ *               success: false
+ *               message: "Internal server error"
+ *               error: {}
  */
 
 export {};
