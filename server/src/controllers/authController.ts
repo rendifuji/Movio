@@ -80,31 +80,31 @@ class AuthController {
 		}
 	}
 
-  static async googleCallback(req: Request, res: Response) {
-    const frontendUrl = process.env.CORS_ORIGIN || "http://localhost:5173";
+	static async googleCallback(req: Request, res: Response) {
+		const frontendUrl = process.env.CORS_ORIGIN || "http://localhost:5173";
 
-    try {
-      const { code } = req.query;
+		try {
+			const { code } = req.query;
 
-      if (!code || typeof code !== "string") {
-        return res.redirect(
-          `${frontendUrl}/auth/google/callback?status=missing_code`
-        );
-      }
+			if (!code || typeof code !== "string") {
+				return res.redirect(
+					`${frontendUrl}/auth/google/callback?status=missing_code`
+				);
+			}
 
 			const result = await AuthService.handleGoogleCallback(code, res);
 
-      if (!result || !result.accessToken) {
-        console.error("Google callback: no access token returned");
-        return res.redirect(`${frontendUrl}/auth/google/callback?status=error`);
-      }
+			if (!result || !result.accessToken) {
+				console.error("Google callback: no access token returned");
+				return res.redirect(`${frontendUrl}/auth/google/callback?status=error`);
+			}
 
-      return res.redirect(`${frontendUrl}/auth/google/callback?status=success`);
-    } catch (error) {
-      console.error("Google callback error:", error);
-      return res.redirect(`${frontendUrl}/auth/google/callback?status=error`);
-    }
-  }
+			return res.redirect(`${frontendUrl}/auth/google/callback?status=success`);
+		} catch (error) {
+			console.error("Google callback error:", error);
+			return res.redirect(`${frontendUrl}/auth/google/callback?status=error`);
+		}
+	}
 }
 
 export default AuthController;

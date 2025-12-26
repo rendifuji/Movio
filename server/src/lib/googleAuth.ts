@@ -1,9 +1,14 @@
 import { Auth, google } from "googleapis";
 
-export const oauth2Client: Auth.OAuth2Client = new google.auth.OAuth2(
+const redirectUri =
+	process.env.NODE_ENV === "production"
+		? "https://movioo.me/api/auth/google/callback"
+		: `http://localhost:${process.env.PORT || 8000}/api/auth/google/callback`;
+
+const oauth2Client: Auth.OAuth2Client = new google.auth.OAuth2(
 	process.env.GOOGLE_CLIENT_ID,
 	process.env.GOOGLE_CLIENT_SECRET,
-	`http://localhost:${process.env.PORT || 8000}/api/auth/google/callback`
+	redirectUri
 );
 
 export const googleScopes = [
@@ -21,28 +26,28 @@ export const getGoogleAuthUrl = () => {
 
 export const getGoogleUserInfo = async (code: string) => {
 	try {
-		console.log("🟡 [GoogleAuth] Exchanging code for tokens...");
+		console.log("[GoogleAuth] Exchanging code for tokens...");
 		const { tokens } = await oauth2Client.getToken(code);
-		console.log("🟡 [GoogleAuth] Tokens received:", {
+		console.log("GoogleAuth] Tokens received:", {
 			has_access_token: !!tokens.access_token,
 			has_refresh_token: !!tokens.refresh_token,
 		});
 
 		oauth2Client.setCredentials(tokens);
 
-		console.log("🟡 [GoogleAuth] Fetching user info from Google...");
+		console.log("[GoogleAuth] Fetching user info from Google...");
 		const oauth2 = google.oauth2({
 			auth: oauth2Client,
 			version: "v2",
 		});
 
 		const userInfoResponse = await oauth2.userinfo.get();
-		console.log("✅ [GoogleAuth] User info received:", userInfoResponse.data);
+		console.log("[GoogleAuth] User info received:", userInfoResponse.data);
 		return userInfoResponse.data;
 	} catch (error) {
-		console.error("❌ [GoogleAuth] Error getting user info:", error);
+		console.error("[GoogleAuth] Error getting user info:", error);
 		if (error instanceof Error) {
-			console.error("❌ [GoogleAuth] Error message:", error.message);
+			console.error("[GoogleAuth] Error message:", error.message);
 		}
 		throw new Error("Failed to get Google user info");
 	}

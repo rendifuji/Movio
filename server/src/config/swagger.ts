@@ -90,6 +90,248 @@ const options: swaggerJsdoc.Options = {
 					},
 				},
 
+				// Media Schemas
+				PresignedUrlRequest: {
+					type: "object",
+					required: ["mimetype", "size"],
+					properties: {
+						mimetype: {
+							type: "string",
+							description:
+								"MIME type of the file (image/png, image/jpeg, image/jpg, image/webp)",
+							example: "image/jpeg",
+						},
+						size: {
+							type: "integer",
+							description: "File size in bytes (max 5MB)",
+							example: 1024000,
+						},
+					},
+				},
+				PresignedUrlResponse: {
+					type: "object",
+					properties: {
+						url: {
+							type: "string",
+							format: "uri",
+							description:
+								"Presigned URL for uploading file to Azure Blob Storage",
+							example:
+								"https://moviostorage.blob.core.windows.net/movies/abc123.jpg?sv=...",
+						},
+						fileKey: {
+							type: "string",
+							description:
+								"File key (blob name) to reference the uploaded file",
+							example: "abc123def456.jpg",
+						},
+					},
+				},
+
+				// Transaction Schemas
+				CheckoutRequest: {
+					type: "object",
+					required: ["scheduleId", "seatLabels"],
+					properties: {
+						scheduleId: {
+							type: "string",
+							format: "uuid",
+							description: "The schedule ID for the movie showing",
+							example: "550e8400-e29b-41d4-a716-446655440000",
+						},
+						seatLabels: {
+							type: "array",
+							items: {
+								type: "string",
+							},
+							description: "Array of seat labels to book",
+							example: ["D10", "D11", "D12"],
+						},
+					},
+				},
+				TransactionStatus: {
+					type: "string",
+					enum: ["PENDING", "PAID", "CANCELLED", "REFUNDED"],
+				},
+				TicketStatus: {
+					type: "string",
+					enum: ["VALID", "USED", "CANCELLED", "EXPIRED"],
+				},
+				Ticket: {
+					type: "object",
+					properties: {
+						ticketId: {
+							type: "string",
+							format: "uuid",
+						},
+						scheduleId: {
+							type: "string",
+							format: "uuid",
+						},
+						seatLabel: {
+							type: "string",
+							example: "D10",
+						},
+						qrCode: {
+							type: "string",
+							description: "Random generated QR code string",
+						},
+						status: {
+							$ref: "#/components/schemas/TicketStatus",
+						},
+					},
+				},
+				MyTicketResponse: {
+					type: "object",
+					properties: {
+						ticketId: {
+							type: "string",
+							format: "uuid",
+						},
+						movieTitle: {
+							type: "string",
+							example: "Zootopia 2",
+						},
+						posterUrl: {
+							type: "string",
+							format: "uri",
+						},
+						date: {
+							type: "string",
+							format: "date-time",
+						},
+						startTime: {
+							type: "string",
+							format: "date-time",
+						},
+						endTime: {
+							type: "string",
+							format: "date-time",
+						},
+						cinemaName: {
+							type: "string",
+							example: "Movio Central Park",
+						},
+						cinemaCity: {
+							type: "string",
+							example: "Jakarta",
+						},
+						seatCount: {
+							type: "integer",
+							example: 3,
+						},
+						seats: {
+							type: "array",
+							items: {
+								type: "string",
+							},
+							example: ["D10", "D11", "D12"],
+						},
+					},
+				},
+				TicketDetailResponse: {
+					type: "object",
+					properties: {
+						movieTitle: {
+							type: "string",
+							example: "Zootopia 2",
+						},
+						durationMinutes: {
+							type: "integer",
+							example: 150,
+						},
+						genre: {
+							type: "string",
+							example: "FANTASY",
+						},
+						rating: {
+							type: "string",
+							example: "PG-13",
+						},
+						date: {
+							type: "string",
+							format: "date-time",
+						},
+						startTime: {
+							type: "string",
+							format: "date-time",
+						},
+						endTime: {
+							type: "string",
+							format: "date-time",
+						},
+						cinemaName: {
+							type: "string",
+							example: "Movio Central Park",
+						},
+						cinemaCity: {
+							type: "string",
+							example: "Jakarta",
+						},
+						studioName: {
+							type: "string",
+							example: "Studio 1",
+						},
+						seatCount: {
+							type: "integer",
+							example: 3,
+						},
+						seats: {
+							type: "array",
+							items: {
+								type: "string",
+							},
+							example: ["D10", "D11", "D12"],
+						},
+						qrCode: {
+							type: "string",
+							description: "QR code string for ticket validation",
+						},
+					},
+				},
+				AdminDashboardResponse: {
+					type: "object",
+					properties: {
+						totalRevenue: {
+							type: "number",
+							example: 5000000,
+						},
+						totalTicketsSold: {
+							type: "integer",
+							example: 125,
+						},
+						nowShowingMovies: {
+							type: "integer",
+							example: 8,
+						},
+						recentTransactions: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									transactionId: {
+										type: "string",
+										format: "uuid",
+									},
+									movieTitle: {
+										type: "string",
+									},
+									userName: {
+										type: "string",
+									},
+									date: {
+										type: "string",
+										format: "date-time",
+									},
+									status: {
+										$ref: "#/components/schemas/TransactionStatus",
+									},
+								},
+							},
+						},
+					},
+				},
+
 				// Movie Schemas
 				MovieGenre: {
 					type: "string",
@@ -447,6 +689,19 @@ const options: swaggerJsdoc.Options = {
 			{
 				name: "Schedules (User)",
 				description: "Schedule endpoints for Users",
+			},
+			{
+				name: "Transaction (Admin)",
+				description: "Transaction and ticket management endpoints for Admin",
+			},
+			{
+				name: "Transaction (User)",
+				description: "Transaction and ticket endpoints for Users",
+			},
+			{
+				name: "Media",
+				description:
+					"Media upload and management endpoints (Azure Blob Storage)",
 			},
 		],
 	},
