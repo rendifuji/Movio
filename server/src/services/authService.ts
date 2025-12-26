@@ -126,7 +126,7 @@ class AuthService {
 				name: user.name,
 				email: user.email,
 				role: user.role.toLowerCase(),
-        picture: user.picture || googleUser.picture || undefined,
+				picture: user.picture || googleUser.picture || undefined,
 			};
 
 			return this.generateTokens(payload, res);

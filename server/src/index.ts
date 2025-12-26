@@ -11,6 +11,11 @@ import { adminCinemaRouter, userCinemaRouter } from "./routes/cinemaRoute.js";
 import { adminStudioRouter, userStudioRouter } from "./routes/studioRoute.js";
 import { userRouter } from "./routes/userRoute.js";
 import authRouter from "./routes/authRoute.js";
+import {
+	adminTicketRouter,
+	userTicketRouter,
+} from "./routes/transactionRoute.js";
+import mediaRouter from "./routes/mediaRoute.js";
 import { setupSwagger } from "./config/swagger.js";
 
 dotenv.config();
@@ -40,6 +45,9 @@ app.use("/api/studio/admin", adminStudioRouter);
 app.use("/api/studio/user", userStudioRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/transaction/admin", adminTicketRouter);
+app.use("/api/transaction/user", userTicketRouter);
+app.use("/api/media", mediaRouter);
 
 app.get("/", (req, res) => {
 	res.send("Test");

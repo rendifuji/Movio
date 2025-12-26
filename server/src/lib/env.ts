@@ -14,6 +14,9 @@ const envSchema = z.object({
 	REFRESH_TOKEN_SECRET: z.string().min(1),
 	GOOGLE_CLIENT_ID: z.string().min(1),
 	GOOGLE_CLIENT_SECRET: z.string().min(1),
+	TMDB_API_KEY: z.string().min(1),
+	AZURE_STORAGE_CONNECTION_STRING: z.string().min(1),
+	CONTAINER_NAME: z.string().min(1),
 });
 
 export const parsedEnv = envSchema.safeParse(process.env);
