@@ -80,33 +80,31 @@ class AuthController {
 		}
 	}
 
-	static async googleCallback(req: Request, res: Response) {
-		try {
-			const { code } = req.query;
+  static async googleCallback(req: Request, res: Response) {
+    const frontendUrl = process.env.CORS_ORIGIN || "http://localhost:5173";
 
-			if (!code || typeof code !== "string") {
-				return errBadRequest(res, "Authorization code is required");
-			}
+    try {
+      const { code } = req.query;
+
+      if (!code || typeof code !== "string") {
+        return res.redirect(
+          `${frontendUrl}/auth/google/callback?status=missing_code`
+        );
+      }
 
 			const result = await AuthService.handleGoogleCallback(code, res);
 
-			return successRes(res, result, "Google login successful");
-		} catch (error) {
-			if (error instanceof Error) {
-				if (error.message === "Google OAuth authentication failed") {
-					return errUnauthenticated(res, "Google authentication failed");
-				}
-				if (error.message === "Failed to get user email from Google") {
-					return errBadRequest(
-						res,
-						"Unable to get user information from Google"
-					);
-				}
-			}
+      if (!result || !result.accessToken) {
+        console.error("Google callback: no access token returned");
+        return res.redirect(`${frontendUrl}/auth/google/callback?status=error`);
+      }
 
-			return errInternalServer(res, error);
-		}
-	}
+      return res.redirect(`${frontendUrl}/auth/google/callback?status=success`);
+    } catch (error) {
+      console.error("Google callback error:", error);
+      return res.redirect(`${frontendUrl}/auth/google/callback?status=error`);
+    }
+  }
 }
 
 export default AuthController;

@@ -47,6 +47,7 @@ class AuthService {
 			name: user.name,
 			email: user.email,
 			role: user.role,
+			picture: user.picture || undefined,
 		};
 
 		return this.generateTokens(payload, res);
@@ -72,6 +73,7 @@ class AuthService {
 				name: decoded.name,
 				email: decoded.email,
 				role: decoded.role,
+				picture: decoded.picture,
 			};
 
 			const accessToken = jwt.sign(payload, env.ACCESS_TOKEN_SECRET, {
@@ -115,6 +117,7 @@ class AuthService {
 					name: googleUser.name || "Google User",
 					role: UserRole.USER,
 					password: await bcrypt.hash("google-oauth-" + Date.now(), 10),
+					picture: googleUser.picture || undefined,
 				});
 			}
 
@@ -123,6 +126,7 @@ class AuthService {
 				name: user.name,
 				email: user.email,
 				role: user.role.toLowerCase(),
+        picture: user.picture || googleUser.picture || undefined,
 			};
 
 			return this.generateTokens(payload, res);

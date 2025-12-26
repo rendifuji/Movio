@@ -13,18 +13,19 @@ import {
 } from "@/components";
 import { useState } from "react";
 import { useLogin } from "@/hooks/auth/useLogin";
-import { Link, useNavigate } from "react-router";
+import { Link, useSearchParams } from "react-router";
+import { getGoogleAuthUrl } from "@/services/api";
 
 function Login({ className, ...props }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoggingIn, error } = useLogin();
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const googleError = searchParams.get("error");
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     login({ email, password });
-    navigate("/");
   };
 
   return (
@@ -82,6 +83,11 @@ function Login({ className, ...props }: React.ComponentProps<"div">) {
                         : "Unable to log in"}
                     </p>
                   )}
+                  {googleError && (
+                    <p className="text-sm text-destructive">
+                      Google sign in failed. Please try again.
+                    </p>
+                  )}
                   <Field>
                     <Button type="submit" disabled={isLoggingIn}>
                       {isLoggingIn ? "Logging in…" : "Login"}
@@ -91,13 +97,16 @@ function Login({ className, ...props }: React.ComponentProps<"div">) {
                     Or continue with
                   </FieldSeparator>
                   <Field className="grid">
-                    <Button variant="outline" type="button">
-                      <img src={Google} alt="Google logo" />
-                      <span className="">Login with Google</span>
+                    <Button variant="outline" type="button" asChild>
+                      <a href={getGoogleAuthUrl()}>
+                        <img src={Google} alt="Google logo" />
+                        <span>Login with Google</span>
+                      </a>
                     </Button>
                   </Field>
                   <FieldDescription className="text-center">
-                    Don&apos;t have an account? <Link to="/register">Sign Up</Link>
+                    Don&apos;t have an account?{" "}
+                    <Link to="/register">Sign Up</Link>
                   </FieldDescription>
                 </FieldGroup>
               </form>

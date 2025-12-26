@@ -13,27 +13,18 @@ import {
 } from "@/components";
 import { useState } from "react";
 import { Link } from "react-router";
+import { useRegister } from "@/hooks/auth/useRegister";
+import { getGoogleAuthUrl } from "@/services/api";
 
 function Register({ className, ...props }: React.ComponentProps<"div">) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { register, isRegistering, error } = useRegister();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsRegistering(true);
-    setError(null);
-
-    try {
-      console.log({ fullName, email, password });
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to register");
-    } finally {
-      setIsRegistering(false);
-    }
+    register({ name: fullName, email, password });
   };
 
   return (
@@ -87,7 +78,11 @@ function Register({ className, ...props }: React.ComponentProps<"div">) {
                       required
                     />
                   </Field>
-                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  {error && (
+                    <p className="text-sm text-destructive">
+                      {error.message || "Unable to register"}
+                    </p>
+                  )}
                   <Field>
                     <Button type="submit" disabled={isRegistering}>
                       {isRegistering ? "Creating account…" : "Sign Up"}
@@ -97,9 +92,11 @@ function Register({ className, ...props }: React.ComponentProps<"div">) {
                     Or continue with
                   </FieldSeparator>
                   <Field className="grid">
-                    <Button variant="outline" type="button">
-                      <img src={Google} alt="Google logo" />
-                      <span>Sign up with Google</span>
+                    <Button variant="outline" type="button" asChild>
+                      <a href={getGoogleAuthUrl()}>
+                        <img src={Google} alt="Google logo" />
+                        <span>Sign up with Google</span>
+                      </a>
                     </Button>
                   </Field>
                   <FieldDescription className="text-center">

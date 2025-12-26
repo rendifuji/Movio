@@ -1,6 +1,7 @@
 export { default as NotFound } from "./NotFound";
-export { default as Login } from "./Login";
-export { default as Register } from "./Register";
+export { default as Login } from "./auth/Login";
+export { default as Register } from "./auth/Register";
+export { default as GoogleCallback } from "./auth/GoogleCallback";
 export { default as Home } from "./user/Home";
 export { default as MovieDetails } from "./user/MovieDetails";
 export { default as BookSeats } from "./user/BookSeats";

@@ -5,4 +5,5 @@ export type CreateUser = {
     email: string;
     password: string;
     role: UserRole;
+    picture?: string;
 }
