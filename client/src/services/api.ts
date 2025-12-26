@@ -1,7 +1,7 @@
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
-import type { LoginResponse } from "@/types/auth";
+import type { AuthUser, LoginResponse } from "@/types/auth";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "";
+export const BASE_URL = import.meta.env.VITE_API_URL || "";
 
 type RetryableRequest = AxiosRequestConfig & { _retry?: boolean };
 
@@ -35,15 +35,44 @@ const processQueue = (error?: unknown) => {
   pendingRequests = [];
 };
 
-const storeTokens = (accessToken: string, refreshToken: string) => {
+export const storeToken = (accessToken: string) => {
   localStorage.setItem("authToken", accessToken);
-  localStorage.setItem("refreshToken", refreshToken);
 };
 
-const clearTokens = () => {
+export const clearAuth = () => {
   localStorage.removeItem("authToken");
-  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("authRole");
+  localStorage.removeItem("authUser");
 };
+
+export const decodeJWT = (token: string): AuthUser | null => {
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(atob(base64));
+    return {
+      id: payload.id,
+      name: payload.name,
+      email: payload.email,
+      role: payload.role?.toLowerCase() as "user" | "admin",
+      picture: payload.picture,
+    };
+  } catch {
+    return null;
+  }
+};
+
+export const handleAuthSuccess = (token: string): AuthUser | null => {
+  storeToken(token);
+  const user = decodeJWT(token);
+  if (user) {
+    localStorage.setItem("authRole", user.role);
+    localStorage.setItem("authUser", JSON.stringify(user));
+  }
+  return user;
+};
+
+export const getGoogleAuthUrl = () => `${BASE_URL}/auth/google`;
 
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
@@ -61,12 +90,6 @@ API.interceptors.response.use(
     const originalRequest = error.config as RetryableRequest;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      if (!localStorage.getItem("refreshToken")) {
-        clearTokens();
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
-
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           pendingRequests.push({
@@ -80,17 +103,15 @@ API.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await authClient.post<LoginResponse>("/auth/refresh", {
-          refreshToken: localStorage.getItem("refreshToken"),
-        });
+        const { data } = await authClient.post<LoginResponse>("/auth/refresh");
 
-        storeTokens(data.accessToken, data.refreshToken);
+        storeToken(data.data.accessToken);
         processQueue();
 
         return API(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError);
-        clearTokens();
+        clearAuth();
         window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {

@@ -8,6 +8,7 @@ import { ProtectedRoute, PageTitle } from "@/components";
 import {
   Login,
   Register,
+  GoogleCallback,
   NotFound,
   AdminDashboard,
   Home,
@@ -48,6 +49,14 @@ createRoot(document.getElementById("root")!).render(
             element={
               <PageTitle title="Register | Movio">
                 <Register />
+              </PageTitle>
+            }
+          />
+          <Route
+            path="/auth/google/callback"
+            element={
+              <PageTitle title="Signing in... | Movio">
+                <GoogleCallback />
               </PageTitle>
             }
           />

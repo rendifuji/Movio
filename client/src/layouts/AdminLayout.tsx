@@ -1,10 +1,16 @@
 import { Outlet, Link, useLocation } from "react-router";
-import { LayoutDashboard, Film, Building2, CalendarDays } from "lucide-react";
-import { Person } from "@/assets/images";
+import {
+  LayoutDashboard,
+  Film,
+  Building2,
+  CalendarDays,
+  LogOut,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -16,7 +22,9 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarImage, Separator } from "@/components";
+import { Avatar, AvatarFallback, AvatarImage, Separator } from "@/components";
+import { useLogout } from "@/hooks/auth";
+import type { AuthUser } from "@/types/auth";
 
 const navItems = [
   { title: "Dashboard", icon: LayoutDashboard, href: "/admin" },
@@ -25,8 +33,16 @@ const navItems = [
   { title: "Schedules", icon: CalendarDays, href: "/admin/schedules" },
 ];
 
+const getUser = (): AuthUser | null => {
+  const stored = localStorage.getItem("authUser");
+  return stored ? JSON.parse(stored) : null;
+};
+
 const AdminLayout = () => {
   const location = useLocation();
+  const { logout, isLoggingOut } = useLogout();
+  const user = getUser();
+  const firstName = user?.name?.split(" ")[0] || "Admin";
 
   return (
     <SidebarProvider>
@@ -72,6 +88,22 @@ const AdminLayout = () => {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+
+        <SidebarFooter className="border-t border-border p-2">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={() => logout()}
+                disabled={isLoggingOut}
+                tooltip="Logout"
+                className="group-data-[collapsible=icon]:px-2 px-4! rounded-none py-6 text-base! text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                <LogOut className="size-6" />
+                <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
       </Sidebar>
 
       <SidebarInset className="flex flex-col">
@@ -85,9 +117,14 @@ const AdminLayout = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Derry</span>
+            <span className="text-sm font-medium">{firstName}</span>
             <Avatar className="h-8 w-8">
-              <AvatarImage src={Person} alt="User avatar" />
+              <AvatarImage
+                src={user?.picture}
+                alt={firstName}
+                referrerPolicy="no-referrer"
+              />
+              <AvatarFallback>{firstName[0]?.toUpperCase()}</AvatarFallback>
             </Avatar>
           </div>
         </header>

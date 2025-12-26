@@ -1,21 +1,23 @@
-import { useState } from "react";
 import { Link, Outlet } from "react-router";
-import { Search } from "lucide-react";
-import { Avatar, AvatarImage } from "@/components";
-import { Person } from "@/assets/images";
+import { Search, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components";
+import type { AuthUser } from "@/types/auth";
+import { useLogout } from "@/hooks/auth/useLogout";
 
 const NAV_LINKS = [
   { label: "Movies", to: "/" },
   { label: "Cinemas", to: "/#" },
 ];
 
-const MOCK_USER = {
-  id: "user-1",
-  name: "Derry",
+const getUser = (): AuthUser | null => {
+  const stored = localStorage.getItem("authUser");
+  return stored ? JSON.parse(stored) : null;
 };
 
 const UserLayout = () => {
-  const [isLoggedIn] = useState(true);
+  const user = getUser();
+  const firstName = user?.name?.split(" ")[0] || "";
+  const { logout } = useLogout();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -54,7 +56,7 @@ const UserLayout = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {isLoggedIn ? (
+            {user ? (
               <>
                 <Link
                   to="/my-tickets"
@@ -64,11 +66,25 @@ const UserLayout = () => {
                 </Link>
                 <div className="flex items-center gap-3 px-3 py-2">
                   <p className="font-medium text-card-foreground">
-                    Hi, {MOCK_USER.name}
+                    Hi, {firstName}
                   </p>
                   <Avatar>
-                    <AvatarImage src={Person} alt={MOCK_USER.name} />
+                    <AvatarImage
+                      src={user.picture}
+                      alt={firstName}
+                      referrerPolicy="no-referrer"
+                    />
+                    <AvatarFallback>
+                      {firstName[0]?.toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
+                  <button
+                    onClick={() => logout()}
+                    className="cursor-pointer ml-2 flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-destructive disabled:opacity-50"
+                    title="Logout"
+                  >
+                    <LogOut className="size-6" />
+                  </button>
                 </div>
               </>
             ) : (

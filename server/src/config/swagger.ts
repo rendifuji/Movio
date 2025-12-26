@@ -70,6 +70,12 @@ const options: swaggerJsdoc.Options = {
 									example: "admin@gmail.com",
 								},
 								role: { type: "string", enum: ["ADMIN", "USER"] },
+								picture: {
+									type: "string",
+									format: "uri",
+									example: "https://lh3.googleusercontent.com/a/ACg8oc...s96-c",
+									description: "URL to user's profile picture (if available).",
+								},
 							},
 						},
 					},

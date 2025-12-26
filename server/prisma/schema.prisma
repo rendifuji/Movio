@@ -54,6 +54,7 @@ model User {
   email     String   @unique
   password  String
   name      String
+  picture   String?
   role      UserRole
   createdAt DateTime @default(now())
 
@@ -94,7 +95,7 @@ model Cinema {
 }
 
 model Studio {
-  studioId String  @id @default(uuid())
+  studioId String @id @default(uuid())
   cinemaId String
   name     String
   capacity Int?
@@ -114,8 +115,8 @@ model Schedule {
   startTime  DateTime
   endTime    DateTime
   price      Decimal  @db.Decimal(10, 2)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   movie   Movie    @relation(fields: [movieId], references: [movieId])
