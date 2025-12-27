@@ -70,7 +70,7 @@ const Checkout = () => {
                 <img
                   src={movie.poster}
                   alt={movie.title}
-                  className="h-80 w-[220px] object-cover"
+                  className="h-80 w-55 object-cover"
                 />
               </div>
 
@@ -138,7 +138,7 @@ const Checkout = () => {
               </div>
 
               <Button
-                className="w-full rounded-lg py-5 text-base font-semibold md:ml-auto md:flex md:w-auto md:min-w-[170px]"
+                className="w-full rounded-lg py-5 text-base font-semibold md:ml-auto md:flex md:w-auto md:min-w-42.5"
                 onClick={handleCheckout}
               >
                 Checkout
