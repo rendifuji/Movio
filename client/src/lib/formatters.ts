@@ -22,3 +22,36 @@ export const formatDate = (dateStr?: string) => {
     year: "numeric",
   });
 };
+
+export const formatTime = (dateStr?: string) => {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  return date
+    .toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+    .replace(":", ".");
+};
+
+export const formatTimeRange = (
+  startTimeStr?: string,
+  durationMinutes?: number
+) => {
+  if (!startTimeStr || durationMinutes === undefined) return "";
+
+  const start = new Date(startTimeStr);
+  const end = new Date(start.getTime() + durationMinutes * 60000);
+
+  const format = (date: Date) =>
+    date
+      .toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+      .replace(":", ".");
+
+  return `${format(start)} - ${format(end)}`;
+};

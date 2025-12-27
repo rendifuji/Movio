@@ -1,0 +1,1 @@
+export { useSeats } from "./useSeats";
