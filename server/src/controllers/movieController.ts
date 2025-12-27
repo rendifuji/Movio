@@ -13,6 +13,26 @@ import {
 import { ZodError } from "zod";
 
 class MovieController {
+	static async getMovieById(req: Request, res: Response) {
+    try {
+      const movieId = req.params.movieId;
+
+      if (!movieId) {
+        return errBadRequest(res, "Movie ID is required");
+      }
+
+      const movie = await MovieService.getMovieById(movieId);
+
+      if (!movie) {
+        return errNotFound(res, "Movie not found");
+      }
+
+      return successRes(res, movie, "Movie found");
+    } catch (error) {
+      return errInternalServer(res, error);
+    }
+  }
+	
 	static async createMovie(req: Request, res: Response) {
 		try {
 			const validatedData = createMovieSchema.parse(req.body);

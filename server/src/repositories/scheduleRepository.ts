@@ -125,11 +125,16 @@ class ScheduleRepository {
 		date?: string,
 		page: number = 1,
 		limit: number = 10,
-		sortBy: string = "date-asc"
+		sortBy: string = "date-asc",
+		movieId?: string
 	) {
 		const skip = (page - 1) * limit;
 
 		const where: any = {};
+
+		if (movieId) {
+			where.movieId = movieId;
+		}
 
 		if (search) {
 			where.movie = {
@@ -226,8 +231,13 @@ class ScheduleRepository {
 		cinemaName?: string,
 		search?: string,
 		date?: string,
+		movieId?: string
 	) {
 		const where: any = {};
+
+		if (movieId) {
+			where.movieId = movieId;
+		}
 
 		if (search) {
 			where.movie = {

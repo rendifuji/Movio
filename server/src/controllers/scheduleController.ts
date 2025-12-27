@@ -21,9 +21,10 @@ class ScheduleController {
 
 			const response = {
 				...schedule,
-				movie: schedule.movie?.title,
-				studio: schedule.studio?.name,
-				cinema: schedule.studio?.cinema?.name,
+				movieTitle: schedule.movie?.title,
+				studioName: schedule.studio?.name,
+				cinemaName: schedule.studio?.cinema?.name,
+				cinemaId: schedule.studio?.cinema?.cinemaId,
 			};
 
 			return successRes(
@@ -152,6 +153,7 @@ class ScheduleController {
 			const search = (req.query.search as string) || undefined;
 			const date = (req.query.date as string) || undefined;
 			const sortBy = (req.query.sortBy as string) || undefined;
+			const movieId = (req.query.movieId as string) || undefined;
 
 			const result = await ScheduleService.getSchedules(
 				studioName,
@@ -160,22 +162,24 @@ class ScheduleController {
 				date,
 				page,
 				limit,
-				sortBy
+				sortBy,
+				movieId
 			);
 
 			const transformedData = result.data.map((schedule: any) => ({
 				scheduleId: schedule.scheduleId,
 				movieId: schedule.movieId,
 				studioId: schedule.studioId,
+				cinemaId: schedule.studio?.cinema?.cinemaId,
 				date: schedule.date,
 				startTime: schedule.startTime,
 				endTime: schedule.endTime,
 				price: schedule.price,
 				createdAt: schedule.createdAt,
 				updatedAt: schedule.updatedAt,
-				movie: schedule.movie?.title || "Unknown Movie",
-				studio: schedule.studio?.name || "Unknown Studio",
-				cinema: schedule.studio?.cinema?.name || "Unknown Cinema",
+				movieTitle: schedule.movie?.title || "Unknown Movie",
+				studioName: schedule.studio?.name || "Unknown Studio",
+				cinemaName: schedule.studio?.cinema?.name || "Unknown Cinema",
 			}));
 
 			const transformedResult = {

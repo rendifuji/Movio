@@ -16,3 +16,7 @@ userScheduleRouter.use(AuthMiddleware.authenticateToken);
 userScheduleRouter.use(AuthMiddleware.userOrAdmin);
 userScheduleRouter.get("/", ScheduleController.getSchedules);
 userScheduleRouter.get("/:scheduleId", ScheduleController.getScheduleById);
+
+export const publicScheduleRouter: Router = express.Router();
+publicScheduleRouter.get("/", ScheduleController.getSchedules);
+publicScheduleRouter.get("/:scheduleId", ScheduleController.getScheduleById);

@@ -16,3 +16,7 @@ export const userCinemaRouter: Router = express.Router();
 userCinemaRouter.use(AuthMiddleware.authenticateToken);
 userCinemaRouter.get("/", CinemaController.getCinemas);
 userCinemaRouter.get("/:cinemaId", CinemaController.getCinemaById);
+
+export const publicCinemaRouter: Router = express.Router();
+publicCinemaRouter.get("/", CinemaController.getCinemas);
+publicCinemaRouter.get("/:cinemaId", CinemaController.getCinemaById);
