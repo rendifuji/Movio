@@ -22,6 +22,11 @@ import { adminStudioRouter, userStudioRouter } from "./routes/studioRoute.js";
 import { publicSeatRouter, userSeatRouter } from "./routes/seatRoute.js";
 import { userRouter } from "./routes/userRoute.js";
 import authRouter from "./routes/authRoute.js";
+import {
+	adminTicketRouter,
+	userTicketRouter,
+} from "./routes/transactionRoute.js";
+import mediaRouter from "./routes/mediaRoute.js";
 import { setupSwagger } from "./config/swagger.js";
 import { initializeSocketIO } from "./lib/socket.js";
 
@@ -60,6 +65,9 @@ app.use("/api/seats/user", userSeatRouter);
 app.use("/api/seats", publicSeatRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/transaction/admin", adminTicketRouter);
+app.use("/api/transaction/user", userTicketRouter);
+app.use("/api/media", mediaRouter);
 
 app.get("/", (req, res) => {
   res.send("Test");
