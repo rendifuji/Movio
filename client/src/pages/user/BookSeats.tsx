@@ -54,14 +54,25 @@ const BookSeats = () => {
   const { movieId } = useParams<{ movieId: string }>();
   const navigate = useNavigate();
   const user = getUser();
-  const { setLockData, setNavigatingToCheckout } = useSeatLockContext();
+  const {
+    lockData,
+    isNavigatingToCheckout,
+    setLockData,
+    setNavigatingToCheckout,
+  } = useSeatLockContext();
 
-  const [selectedDate, setSelectedDate] = useState(dates[0].full);
+  const isReturningFromCheckout =
+    isNavigatingToCheckout && lockData !== null && lockData.movieId === movieId;
+
+  const initialDate = isReturningFromCheckout ? lockData.date : dates[0].full;
+
+  const [selectedDate, setSelectedDate] = useState(initialDate);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(
     null
   );
   const [expandedOverview, setExpandedOverview] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const { movie, isLoading: movieLoading } = useMovie(movieId);
   const { cinemas: allCinemas, isLoading: cinemasLoading } = useCinemas({
@@ -71,6 +82,22 @@ const BookSeats = () => {
     movieId,
     date: selectedDate,
   });
+  if (
+    !initialized &&
+    !schedulesLoading &&
+    isReturningFromCheckout &&
+    schedules.length > 0
+  ) {
+    const targetSchedule = schedules.find(
+      (s) => s.scheduleId === lockData.scheduleId
+    );
+    if (targetSchedule) {
+      setSelectedLocation(targetSchedule.cinemaId);
+      setSelectedScheduleId(lockData.scheduleId);
+    }
+    setNavigatingToCheckout(false);
+    setInitialized(true);
+  }
 
   // Filter schedules by selected cinema
   const filteredSchedules = selectedLocation
@@ -92,7 +119,6 @@ const BookSeats = () => {
     toggleSeat,
     getSeatStatus,
     getEarliestLockedAt,
-    prepareForCheckout,
   } = useSeats({
     scheduleId: currentScheduleId || "",
     userId: user?.id || "",
@@ -440,8 +466,6 @@ const BookSeats = () => {
                 });
 
                 setNavigatingToCheckout(true);
-                prepareForCheckout();
-
                 navigate(`/checkout/${movieId}`);
               }}
             >

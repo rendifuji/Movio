@@ -15,7 +15,6 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
   const [mySeats, setMySeats] = useState<Map<string, number>>(new Map());
   const [isConnected, setIsConnected] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [skipCleanup, setSkipCleanup] = useState(false);
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -57,6 +56,19 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
         return next;
       });
     },
+    onSeatExpired: ({ seatLabel }) => {
+      // Handle seat expiration - remove from both lockedByOthers and mySeats
+      setLockedByOthers((prev) => {
+        const next = new Set(prev);
+        next.delete(seatLabel);
+        return next;
+      });
+      setMySeats((prev) => {
+        const next = new Map(prev);
+        next.delete(seatLabel);
+        return next;
+      });
+    },
     onInitialSeats: ({ lockedSeats }) => {
       const others = new Set<string>();
       const mine = new Map<string, number>();
@@ -67,7 +79,6 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
       setLockedByOthers(others);
       setMySeats(mine);
     },
-    skipCleanup,
   });
 
   useEffect(() => {
@@ -151,8 +162,6 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
     return Math.min(...mySeats.values());
   };
 
-  const prepareForCheckout = () => setSkipCleanup(true);
-
   return {
     selectedSeats: Array.from(mySeats.keys()),
     totalSeats: data?.data.totalSeats ?? 0,
@@ -164,6 +173,5 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
     toggleSeat,
     getSeatStatus,
     getEarliestLockedAt,
-    prepareForCheckout,
   };
 };

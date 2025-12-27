@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserLayout, AdminLayout } from "./layouts";
 import { ProtectedRoute, PageTitle } from "@/components";
+import { SeatLockProvider } from "@/contexts";
 import {
   Login,
   Register,
@@ -34,137 +35,139 @@ export const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/login"
-            element={
-              <PageTitle title="Login | Movio">
-                <Login />
-              </PageTitle>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PageTitle title="Register | Movio">
-                <Register />
-              </PageTitle>
-            }
-          />
-          <Route
-            path="/auth/google/callback"
-            element={
-              <PageTitle title="Signing in... | Movio">
-                <GoogleCallback />
-              </PageTitle>
-            }
-          />
-
-          <Route element={<UserLayout />}>
+      <SeatLockProvider>
+        <BrowserRouter>
+          <Routes>
             <Route
-              path="/"
+              path="/login"
               element={
-                <PageTitle title="Home | Movio">
-                  <Home />
+                <PageTitle title="Login | Movio">
+                  <Login />
                 </PageTitle>
               }
             />
             <Route
-              path="/my-tickets"
+              path="/register"
               element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <PageTitle title="My Tickets | Movio">
-                    <MyTickets />
-                  </PageTitle>
-                </ProtectedRoute>
+                <PageTitle title="Register | Movio">
+                  <Register />
+                </PageTitle>
               }
             />
             <Route
-              path="/checkout/:movieId"
+              path="/auth/google/callback"
               element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <PageTitle title="Checkout | Movio">
-                    <Checkout />
-                  </PageTitle>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ticket/:ticketId"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <PageTitle title="Ticket Detail | Movio">
-                    <TicketDetail />
-                  </PageTitle>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/movie/:movieId"
-              element={
-                <PageTitle title="Movie Details | Movio">
-                  <MovieDetails />
+                <PageTitle title="Signing in... | Movio">
+                  <GoogleCallback />
                 </PageTitle>
               }
             />
 
-            <Route
-              path="/book/:movieId"
-              element={
-                <ProtectedRoute allowedRoles={["user"]}>
-                  <PageTitle title="Book Seats | Movio">
-                    <BookSeats />
+            <Route element={<UserLayout />}>
+              <Route
+                path="/"
+                element={
+                  <PageTitle title="Home | Movio">
+                    <Home />
                   </PageTitle>
+                }
+              />
+              <Route
+                path="/my-tickets"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <PageTitle title="My Tickets | Movio">
+                      <MyTickets />
+                    </PageTitle>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/checkout/:movieId"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <PageTitle title="Checkout | Movio">
+                      <Checkout />
+                    </PageTitle>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/ticket/:ticketId"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <PageTitle title="Ticket Detail | Movio">
+                      <TicketDetail />
+                    </PageTitle>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/movie/:movieId"
+                element={
+                  <PageTitle title="Movie Details | Movio">
+                    <MovieDetails />
+                  </PageTitle>
+                }
+              />
+
+              <Route
+                path="/book/:movieId"
+                element={
+                  <ProtectedRoute allowedRoles={["user"]}>
+                    <PageTitle title="Book Seats | Movio">
+                      <BookSeats />
+                    </PageTitle>
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminLayout />
                 </ProtectedRoute>
               }
-            />
-          </Route>
+            >
+              <Route
+                index
+                element={
+                  <PageTitle title="Admin Overview | Movio">
+                    <AdminDashboard />
+                  </PageTitle>
+                }
+              />
+              <Route
+                path="movies"
+                element={
+                  <PageTitle title="Manage Movies | Admin">
+                    <AdminMovies />
+                  </PageTitle>
+                }
+              />
+              <Route
+                path="schedules"
+                element={
+                  <PageTitle title="Schedules | Admin">
+                    <AdminSchedules />
+                  </PageTitle>
+                }
+              />
+            </Route>
 
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
             <Route
-              index
+              path="*"
               element={
-                <PageTitle title="Admin Overview | Movio">
-                  <AdminDashboard />
+                <PageTitle title="404 Not Found">
+                  <NotFound />
                 </PageTitle>
               }
             />
-            <Route
-              path="movies"
-              element={
-                <PageTitle title="Manage Movies | Admin">
-                  <AdminMovies />
-                </PageTitle>
-              }
-            />
-            <Route
-              path="schedules"
-              element={
-                <PageTitle title="Schedules | Admin">
-                  <AdminSchedules />
-                </PageTitle>
-              }
-            />
-          </Route>
-
-          <Route
-            path="*"
-            element={
-              <PageTitle title="404 Not Found">
-                <NotFound />
-              </PageTitle>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+      </SeatLockProvider>
     </QueryClientProvider>
   </StrictMode>
 );

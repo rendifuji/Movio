@@ -12,6 +12,7 @@ interface SocketCallbacks {
   }) => void;
   onSeatReleased?: (data: { seatLabel: string }) => void;
   onSeatsReleased?: (data: { seatLabels: string[] }) => void;
+  onSeatExpired?: (data: { seatLabel: string }) => void;
   onInitialSeats?: (data: {
     lockedSeats: Array<{
       seatLabel: string;
@@ -21,7 +22,6 @@ interface SocketCallbacks {
   }) => void;
   onConnect?: () => void;
   onDisconnect?: () => void;
-  skipCleanup?: boolean;
 }
 
 export const useSocket = (
@@ -30,11 +30,6 @@ export const useSocket = (
   callbacks: SocketCallbacks
 ) => {
   const socketRef = useRef<Socket | null>(null);
-  const skipCleanupRef = useRef(callbacks.skipCleanup ?? false);
-
-  useEffect(() => {
-    skipCleanupRef.current = callbacks.skipCleanup ?? false;
-  }, [callbacks.skipCleanup]);
 
   useEffect(() => {
     if (!scheduleId || !userId) return;
@@ -54,12 +49,10 @@ export const useSocket = (
     socket.on("server:seat-locked", callbacks.onSeatLocked || (() => {}));
     socket.on("server:seat-released", callbacks.onSeatReleased || (() => {}));
     socket.on("server:seats-released", callbacks.onSeatsReleased || (() => {}));
+    socket.on("server:seat-expired", callbacks.onSeatExpired || (() => {}));
     socket.on("initial-locked-seats", callbacks.onInitialSeats || (() => {}));
 
     return () => {
-      if (!skipCleanupRef.current) {
-        socket.emit("leave-schedule", { scheduleId });
-      }
       socket.disconnect();
     };
   }, [scheduleId, userId]); // eslint-disable-line react-hooks/exhaustive-deps
