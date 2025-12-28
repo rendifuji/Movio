@@ -13,3 +13,30 @@ export const useAdminDashboard = () => {
     error: query.error,
   };
 };
+
+export const useTicketDetail = (ticketId: string | undefined) => {
+  const query = useQuery({
+    queryKey: ["ticket", ticketId],
+    queryFn: () => transactionService.getTicketById(ticketId!),
+    enabled: !!ticketId,
+  });
+
+  return {
+    ticket: query.data?.data?.data,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+};
+
+export const useMyTickets = () => {
+  const query = useQuery({
+    queryKey: ["my-tickets"],
+    queryFn: () => transactionService.getMyTickets(),
+  });
+
+  return {
+    tickets: query.data?.data?.data ?? [],
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+};
