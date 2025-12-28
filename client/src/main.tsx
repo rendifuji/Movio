@@ -114,7 +114,7 @@ createRoot(document.getElementById("root")!).render(
               <Route
                 path="/book/:movieId"
                 element={
-                  <ProtectedRoute allowedRoles={["user"]}>
+                  <ProtectedRoute allowedRoles={["user", "admin"]}>
                     <PageTitle title="Book Seats | Movio">
                       <BookSeats />
                     </PageTitle>

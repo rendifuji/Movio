@@ -46,7 +46,7 @@ class AuthService {
 			id: user.userId,
 			name: user.name,
 			email: user.email,
-			role: user.role,
+			role: (user.role as string).toUpperCase(),
 			picture: user.picture || undefined,
 		};
 
@@ -68,12 +68,18 @@ class AuthService {
 				env.REFRESH_TOKEN_SECRET
 			) as TokenPayload;
 
+			const user = await UserRepository.getUserByEmail(decoded.email);
+
+			if (!user) {
+				throw new Error("User not found");
+			}
+
 			const payload: TokenPayload = {
-				id: decoded.id,
-				name: decoded.name,
-				email: decoded.email,
-				role: decoded.role,
-				picture: decoded.picture,
+				id: user.userId,
+				name: user.name,
+				email: user.email,
+				role: (user.role as string).toUpperCase(),
+				picture: user.picture || undefined,
 			};
 
 			const accessToken = jwt.sign(payload, env.ACCESS_TOKEN_SECRET, {
@@ -125,7 +131,7 @@ class AuthService {
 				id: user.userId,
 				name: user.name,
 				email: user.email,
-				role: user.role.toLowerCase(),
+				role: (user.role as string).toUpperCase(),
 				picture: user.picture || googleUser.picture || undefined,
 			};
 

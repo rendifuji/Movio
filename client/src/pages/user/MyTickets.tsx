@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Endgame, Zootopia, JJK } from "@/assets/images";
 import { Map, CalenderLogo, Clock } from "@/assets/logo";
 import { getTicket } from "@/hooks/get/getTicket";
 

@@ -36,6 +36,7 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
     onConnect: () => setIsConnected(true),
     onDisconnect: () => setIsConnected(false),
     onSeatLocked: ({ seatLabel, lockedBy, lockedAt }) => {
+      refetch();
       if (lockedBy === userId) {
         setMySeats((prev) => new Map(prev).set(seatLabel, lockedAt));
       } else {
@@ -43,6 +44,7 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
       }
     },
     onSeatReleased: ({ seatLabel }) => {
+      refetch();
       setLockedByOthers((prev) => {
         const next = new Set(prev);
         next.delete(seatLabel);
@@ -50,6 +52,7 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
       });
     },
     onSeatsReleased: ({ seatLabels }) => {
+      refetch();
       setLockedByOthers((prev) => {
         const next = new Set(prev);
         seatLabels.forEach((s) => next.delete(s));
@@ -57,6 +60,7 @@ export const useSeats = ({ scheduleId, userId }: UseSeatsOptions) => {
       });
     },
     onSeatExpired: ({ seatLabel }) => {
+      refetch();
       // Handle seat expiration - remove from both lockedByOthers and mySeats
       setLockedByOthers((prev) => {
         const next = new Set(prev);

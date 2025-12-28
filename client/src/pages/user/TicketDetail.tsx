@@ -2,7 +2,6 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { ArrowLeft, Clock, Film, Calendar, Download } from "lucide-react";
 import QRCode from "react-qr-code";
-import { getTicketId } from "@/hooks/get";
 
 const TicketPage: React.FC = () => {
 	const { ticketId } = useParams<{ ticketId: string }>();
