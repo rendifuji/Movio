@@ -11,7 +11,9 @@ import { BASE_URL } from "@/services/api";
 import { seatService } from "@/services/seat";
 import type { AuthUser } from "@/types/auth";
 
-const SOCKET_URL = BASE_URL.replace("/api", "") || "http://localhost:3000";
+const SOCKET_URL =
+  BASE_URL.replace("/api", "") ||
+  (import.meta.env.DEV ? "http://localhost:3000" : "/");
 const LOCK_TTL = 600; // 10 minutes
 
 export interface SeatLockData {

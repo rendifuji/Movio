@@ -2,7 +2,9 @@ import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { BASE_URL } from "@/services/api";
 
-const SOCKET_URL = BASE_URL.replace("/api", "") || "http://localhost:3000";
+const SOCKET_URL =
+  BASE_URL.replace("/api", "") ||
+  (import.meta.env.DEV ? "http://localhost:3000" : "/");
 
 interface SocketCallbacks {
   onSeatLocked?: (data: {
