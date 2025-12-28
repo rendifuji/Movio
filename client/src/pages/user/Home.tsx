@@ -17,7 +17,7 @@ const Home = () => {
   const featuredMovie: Movie | undefined = movies[0];
 
   return (
-    <div className="min-h-screen bg-[#030b1b] text-white">
+    <div className="w-full min-h-screen bg-[#030b1b] text-white">
       <section className="relative w-full min-h-[60vh] flex items-end justify-start">
         <div
           className="absolute inset-0"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,6 +12,8 @@ import {
   ChevronDown,
   ListFilter,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Button,
@@ -25,7 +27,6 @@ import {
   PopoverContent,
   PopoverTrigger,
   Label,
-  Slider,
 } from "@/components";
 import { AddMovieModal, EditMovieModal } from "@/components/admin";
 import { useMovies } from "@/hooks/movie/useMovies";
@@ -79,78 +80,23 @@ const StatusBadge = ({ status }: { status: DisplayStatus }) => {
   );
 };
 
-const createColumns = (onEdit: (movie: Movie) => void, onDelete: (id: string) => void) => [
-  columnHelper.display({
-    id: "movie",
-    header: "Movie",
-    cell: ({ row }) => {
-      const movie = row.original;
-      return (
-        <div className="flex items-center gap-4">
-          <img
-            src={movie.posterUrl}
-            alt={movie.title}
-            className="h-16 w-12 rounded-md object-cover"
-          />
-          <div className="flex flex-col gap-1">
-            <span className="font-medium">{movie.title}</span>
-            <GenreBadge genre={movie.genre} />
-          </div>
-        </div>
-      );
-    },
-  }),
-  columnHelper.accessor("durationMinutes", {
-    header: "Duration",
-    cell: (info) => formatDuration(info.getValue()),
-  }),
-  columnHelper.accessor("status", {
-    header: "Status",
-    cell: (info) => <StatusBadge status={mapStatus(info.getValue())} />,
-  }),
-  columnHelper.accessor("rating", {
-    header: "Rating",
-    cell: (info) => info.getValue(),
-  }),
-  columnHelper.display({
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8"
-          onClick={() => onEdit(row.original)}
-        >
-          <Pencil className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-destructive hover:text-destructive"
-          onClick={() => onDelete(row.original.movieId)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    ),
-  }),
-];
-
 const Movies = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [filterGenre, setFilterGenre] = useState<string>("");
-  const [ratingRange, setRatingRange] = useState<number[]>([0, 10]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
-  // Fetch movies from API with filters
-  const { movies, isLoading, error } = useMovies({
+  // Memoize params to ensure query stability
+  const queryParams = useMemo(() => ({
+    page,
+    limit,
     search: search || undefined,
     sortBy: sortBy || undefined,
     status: filterStatus && filterStatus !== "all"
@@ -159,22 +105,97 @@ const Movies = () => {
     genre: filterGenre && filterGenre !== "all"
       ? (filterGenre.toUpperCase().replace("-", "_") as MovieGenre)
       : undefined,
-  });
+  }), [page, limit, search, sortBy, filterStatus, filterGenre]);
+
+  // Fetch movies from API with filters
+  const { movies: fetchedMovies, metadata, isLoading } = useMovies(queryParams);
+  
+  // Memoize data to prevent table re-renders on every render if data hasn't changed
+  const movies = useMemo(() => fetchedMovies ?? [], [fetchedMovies]);
 
   const deleteMutation = useDeleteMovie();
 
-  const handleDelete = (movieId: string) => {
+  const handleDelete = useCallback((movieId: string) => {
     if (confirm("Are you sure you want to delete this movie?")) {
       deleteMutation.mutate(movieId);
     }
-  };
+  }, [deleteMutation]);
 
-  const handleEdit = (movie: Movie) => {
+  const handleEdit = useCallback((movie: Movie) => {
     setSelectedMovie(movie);
     setEditModalOpen(true);
+  }, []);
+
+  // Reset page when filters change
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+  
+  const handleSortChange = (value: string) => {
+    setSortBy(value);
+    setPage(1);
   };
 
-  const columns = createColumns(handleEdit, handleDelete);
+  // Create columns definition
+  const columns = useMemo(() => [
+    columnHelper.display({
+      id: "movie",
+      header: "Movie",
+      cell: ({ row }) => {
+        const movie = row.original;
+        return (
+          <div className="flex items-center gap-4">
+            <img
+              src={movie.posterUrl}
+              alt={movie.title}
+              className="h-16 w-12 rounded-md object-cover"
+            />
+            <div className="flex flex-col gap-1">
+              <span className="font-medium">{movie.title}</span>
+              <GenreBadge genre={movie.genre} />
+            </div>
+          </div>
+        );
+      },
+    }),
+    columnHelper.accessor("durationMinutes", {
+      header: "Duration",
+      cell: (info) => formatDuration(info.getValue()),
+    }),
+    columnHelper.accessor("status", {
+      header: "Status",
+      cell: (info) => <StatusBadge status={mapStatus(info.getValue())} />,
+    }),
+    columnHelper.accessor("rating", {
+      header: "Rating",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.display({
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={() => handleEdit(row.original)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-destructive hover:text-destructive"
+            onClick={() => handleDelete(row.original.movieId)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    }),
+  ], [handleEdit, handleDelete]);
 
   const table = useReactTable({
     data: movies,
@@ -195,12 +216,12 @@ const Movies = () => {
               aria-label="Search movies"
               placeholder="Search movie"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
             />
           </div>
 
-          <Select value={sortBy} onValueChange={setSortBy}>
+          <Select value={sortBy} onValueChange={handleSortChange}>
             <SelectTrigger className="border border-border py-3 h-auto! px-4 gap-16 cursor-pointer w-fit">
               <SelectValue placeholder="Sort By" />
               <ChevronDown className="size-4 ml-auto opacity-50" />
@@ -208,8 +229,6 @@ const Movies = () => {
             <SelectContent>
               <SelectItem value="title-asc">Title (A-Z)</SelectItem>
               <SelectItem value="title-desc">Title (Z-A)</SelectItem>
-              <SelectItem value="rating-asc">Rating (Low to High)</SelectItem>
-              <SelectItem value="rating-desc">Rating (High to Low)</SelectItem>
               <SelectItem value="duration-asc">Duration (Short)</SelectItem>
               <SelectItem value="duration-desc">Duration (Long)</SelectItem>
             </SelectContent>
@@ -266,22 +285,6 @@ const Movies = () => {
                   </Select>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <Label>Rating Range</Label>
-                  <Slider
-                    value={ratingRange}
-                    onValueChange={setRatingRange}
-                    min={0}
-                    max={10}
-                    step={0.5}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{ratingRange[0].toFixed(1)}</span>
-                    <span>{ratingRange[1].toFixed(1)}</span>
-                  </div>
-                </div>
-
                 <div className="flex gap-2 pt-2">
                   <Button
                     variant="outline"
@@ -289,7 +292,7 @@ const Movies = () => {
                     onClick={() => {
                       setFilterStatus("");
                       setFilterGenre("");
-                      setRatingRange([0, 10]);
+                      setPage(1);
                     }}
                   >
                     Reset
@@ -297,6 +300,7 @@ const Movies = () => {
                   <Button
                     className="flex-1"
                     onClick={() => {
+                      setPage(1);
                       setFiltersOpen(false);
                     }}
                   >
@@ -324,9 +328,6 @@ const Movies = () => {
         movie={selectedMovie} 
       />
 
-      {isLoading && <p className="text-muted-foreground">Loading movies...</p>}
-      {error && <p className="text-destructive">Error loading movies</p>}
-
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full text-sm">
           <thead className="border-b border-border bg-muted/50">
@@ -349,20 +350,75 @@ const Movies = () => {
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-b border-border last:border-0">
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-6 py-4">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-6 py-12 text-center text-muted-foreground"
+                >
+                  Loading movies...
+                </td>
               </tr>
-            ))}
+            ) : movies.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-6 py-12 text-center text-muted-foreground"
+                >
+                  No movies found
+                </td>
+              </tr>
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b border-border last:border-0"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="px-6 py-4">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between px-2">
+        <div className="text-sm text-muted-foreground">
+          Showing {movies.length} of {metadata?.totalItems ?? 0} movies
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={!metadata?.hasPrevPage}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {metadata?.totalPages ?? 1}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setPage((p) => (metadata?.hasNextPage ? p + 1 : p))}
+            disabled={!metadata?.hasNextPage}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Movies;
+

@@ -44,14 +44,14 @@ const MovieDetails = () => {
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-[#030b1b] text-white flex items-center justify-center">
+      <div className="w-full min-h-screen bg-[#030b1b] text-white flex items-center justify-center">
         <p className="text-lg text-slate-400">Movie not found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#030b1b] text-white">
+    <div className="w-full min-h-screen bg-[#030b1b] text-white">
       <section className="relative w-full min-h-[50vh]">
         <div
           className="absolute inset-0"
