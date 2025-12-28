@@ -57,7 +57,7 @@ const TicketPage: React.FC = () => {
 
 	if (isLoading) {
 		return (
-			<div className="min-h-screen bg-[#020410] flex items-center justify-center">
+			<div className="w-full min-h-screen bg-[#020410] flex items-center justify-center">
 				<Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
 			</div>
 		);
@@ -65,7 +65,7 @@ const TicketPage: React.FC = () => {
 
 	if (error || !ticket) {
 		return (
-			<div className="min-h-screen bg-[#020410] flex flex-col items-center justify-center gap-4">
+			<div className="w-full min-h-screen bg-[#020410] flex flex-col items-center justify-center gap-4">
 				<p className="text-red-500">Failed to load ticket details</p>
 				<button
 					onClick={() => navigate(-1)}
@@ -82,7 +82,7 @@ const TicketPage: React.FC = () => {
 			<div className="w-full max-w-4xl">
 				<button
 					onClick={() => navigate(-1)}
-					className="mb-6 p-3 rounded-xl bg-[#131b2e] border border-gray-800 hover:bg-gray-800 transition-colors"
+					className="cursor-pointer mb-6 p-3 rounded-xl bg-[#131b2e] border border-gray-800 hover:bg-gray-800 transition-colors"
 				>
 					<ArrowLeft className="w-5 h-5 text-gray-400" />
 				</button>
@@ -154,7 +154,7 @@ const TicketPage: React.FC = () => {
 
 						<button 
 							onClick={handleDownload}
-							className="flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white px-8 py-3 rounded-lg font-medium transition-all shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_25px_rgba(59,130,246,0.8)]"
+							className="cursor-pointer flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white px-8 py-3 rounded-lg font-medium transition-all shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_25px_rgba(59,130,246,0.8)]"
 						>
 							<Download className="w-5 h-5" />
 							Download
