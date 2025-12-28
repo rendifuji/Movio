@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -13,7 +13,6 @@ import {
   ListFilter,
   Search,
 } from "lucide-react";
-import { MoviePoster } from "@/assets/images";
 import {
   Button,
   Badge,
@@ -28,163 +27,47 @@ import {
   Label,
   Slider,
 } from "@/components";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { AddMovieModal } from "@/components/admin";
+import { AddMovieModal, EditMovieModal } from "@/components/admin";
+import { useMovies } from "@/hooks/movie/useMovies";
+import { useDeleteMovie } from "@/hooks/movie_admin";
+import type { Movie, MovieStatus as ApiMovieStatus, MovieGenre } from "@/types/movie";
 
-type MovieStatus = "Now Showing" | "Coming Soon" | "End";
+type DisplayStatus = "Now Showing" | "Coming Soon";
 
-type Movie = {
-  id: string;
-  title: string;
-  poster: string;
-  genres: string[];
-  duration: string;
-  status: MovieStatus;
-  rating: number;
+const formatDuration = (minutes: number): string => {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${m}m`;
 };
 
-const movies: Movie[] = [
-  {
-    id: "1",
-    title: "Zootopia 2",
-    poster: MoviePoster,
-    genres: ["Fantasy", "Adventure", "Animation"],
-    duration: "2h 15m",
-    status: "Now Showing",
-    rating: 9.2,
-  },
-  {
-    id: "2",
-    title: "Dune: Part Two",
-    poster: MoviePoster,
-    genres: ["Sci-Fi", "Action", "Adventure"],
-    duration: "2h 46m",
-    status: "Now Showing",
-    rating: 8.9,
-  },
-  {
-    id: "3",
-    title: "Oppenheimer",
-    poster: MoviePoster,
-    genres: ["Drama", "History", "Biography"],
-    duration: "3h 0m",
-    status: "End",
-    rating: 8.7,
-  },
-  {
-    id: "4",
-    title: "The Grand Budapest Hotel",
-    poster: MoviePoster,
-    genres: ["Comedy", "Drama"],
-    duration: "1h 39m",
-    status: "End",
-    rating: 8.1,
-  },
-  {
-    id: "5",
-    title: "Interstellar",
-    poster: MoviePoster,
-    genres: ["Sci-Fi", "Adventure", "Drama"],
-    duration: "2h 49m",
-    status: "Now Showing",
-    rating: 8.6,
-  },
-  {
-    id: "6",
-    title: "Avengers: Endgame",
-    poster: MoviePoster,
-    genres: ["Action", "Adventure", "Sci-Fi"],
-    duration: "3h 1m",
-    status: "End",
-    rating: 8.4,
-  },
-  {
-    id: "7",
-    title: "Into the Spider-Verse",
-    poster: MoviePoster,
-    genres: ["Animation", "Action", "Adventure"],
-    duration: "1h 57m",
-    status: "Now Showing",
-    rating: 8.4,
-  },
-  {
-    id: "8",
-    title: "The Lighthouse",
-    poster: MoviePoster,
-    genres: ["Horror", "Drama", "Fantasy"],
-    duration: "1h 49m",
-    status: "Coming Soon",
-    rating: 7.4,
-  },
-  {
-    id: "9",
-    title: "Moana 2",
-    poster: MoviePoster,
-    genres: ["Animation", "Adventure", "Comedy", "Family"],
-    duration: "1h 40m",
-    status: "Coming Soon",
-    rating: 7.8,
-  },
-  {
-    id: "10",
-    title: "Wicked",
-    poster: MoviePoster,
-    genres: ["Fantasy", "Musical", "Romance"],
-    duration: "2h 40m",
-    status: "Coming Soon",
-    rating: 8.0,
-  },
-];
+const mapStatus = (status: ApiMovieStatus): DisplayStatus => {
+  return status === "NOW_SHOWING" ? "Now Showing" : "Coming Soon";
+};
+
+const formatGenre = (genre: MovieGenre): string => {
+  return genre
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ");
+};
 
 const columnHelper = createColumnHelper<Movie>();
 
-const GenreBadges = ({ genres }: { genres: string[] }) => {
-  const maxVisible = 2;
-  const visible = genres.slice(0, maxVisible);
-  const hidden = genres.slice(maxVisible);
-
+const GenreBadge = ({ genre }: { genre: MovieGenre }) => {
   return (
-    <div className="flex flex-wrap gap-1">
-      {visible.map((g) => (
-        <Badge
-          key={g}
-          variant="outline"
-          className="text-xs font-normal text-muted-foreground"
-        >
-          {g}
-        </Badge>
-      ))}
-      {hidden.length > 0 && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Badge
-                variant="outline"
-                className="cursor-default text-xs font-normal text-muted-foreground"
-              >
-                {hidden.length} More...
-              </Badge>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs">
-              <p>{hidden.join(", ")}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      )}
-    </div>
+    <Badge
+      variant="outline"
+      className="text-xs font-normal text-muted-foreground"
+    >
+      {formatGenre(genre)}
+    </Badge>
   );
 };
 
-const StatusBadge = ({ status }: { status: MovieStatus }) => {
-  const styles: Record<MovieStatus, string> = {
+const StatusBadge = ({ status }: { status: DisplayStatus }) => {
+  const styles: Record<DisplayStatus, string> = {
     "Now Showing": "bg-green-600 text-white",
     "Coming Soon": "bg-amber-500 text-white",
-    End: "bg-red-600 text-white",
   };
 
   return (
@@ -196,7 +79,7 @@ const StatusBadge = ({ status }: { status: MovieStatus }) => {
   );
 };
 
-const columns = [
+const createColumns = (onEdit: (movie: Movie) => void, onDelete: (id: string) => void) => [
   columnHelper.display({
     id: "movie",
     header: "Movie",
@@ -205,42 +88,48 @@ const columns = [
       return (
         <div className="flex items-center gap-4">
           <img
-            src={movie.poster}
+            src={movie.posterUrl}
             alt={movie.title}
             className="h-16 w-12 rounded-md object-cover"
           />
           <div className="flex flex-col gap-1">
             <span className="font-medium">{movie.title}</span>
-            <GenreBadges genres={movie.genres} />
+            <GenreBadge genre={movie.genre} />
           </div>
         </div>
       );
     },
   }),
-  columnHelper.accessor("duration", {
+  columnHelper.accessor("durationMinutes", {
     header: "Duration",
-    cell: (info) => info.getValue(),
+    cell: (info) => formatDuration(info.getValue()),
   }),
   columnHelper.accessor("status", {
     header: "Status",
-    cell: (info) => <StatusBadge status={info.getValue()} />,
+    cell: (info) => <StatusBadge status={mapStatus(info.getValue())} />,
   }),
   columnHelper.accessor("rating", {
     header: "Rating",
-    cell: (info) => info.getValue().toFixed(1),
+    cell: (info) => info.getValue(),
   }),
   columnHelper.display({
     id: "actions",
     header: "Actions",
-    cell: () => (
+    cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="h-8 w-8">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8"
+          onClick={() => onEdit(row.original)}
+        >
           <Pencil className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
           className="h-8 w-8 text-destructive hover:text-destructive"
+          onClick={() => onDelete(row.original.movieId)}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
@@ -250,7 +139,6 @@ const columns = [
 ];
 
 const Movies = () => {
-  const data = useMemo(() => movies, []);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<string>("");
   const [filterStatus, setFilterStatus] = useState<string>("");
@@ -258,27 +146,38 @@ const Movies = () => {
   const [ratingRange, setRatingRange] = useState<number[]>([0, 10]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const filteredData = useMemo(() => {
-    return data.filter((m) => {
-      const q = search.trim().toLowerCase();
-      const searchOk = !q || m.title.toLowerCase().includes(q);
-      const statusOk =
-        !filterStatus ||
-        filterStatus === "all" ||
-        m.status.toLowerCase().replaceAll(" ", "-") === filterStatus;
-      const genreOk =
-        !filterGenre ||
-        filterGenre === "all" ||
-        m.genres.some((g) => g.toLowerCase() === filterGenre);
-      const ratingOk = m.rating >= ratingRange[0] && m.rating <= ratingRange[1];
+  // Fetch movies from API with filters
+  const { movies, isLoading, error } = useMovies({
+    search: search || undefined,
+    sortBy: sortBy || undefined,
+    status: filterStatus && filterStatus !== "all"
+      ? (filterStatus === "now-showing" ? "NOW_SHOWING" : "COMING_SOON")
+      : undefined,
+    genre: filterGenre && filterGenre !== "all"
+      ? (filterGenre.toUpperCase().replace("-", "_") as MovieGenre)
+      : undefined,
+  });
 
-      return searchOk && statusOk && genreOk && ratingOk;
-    });
-  }, [data, search, filterStatus, filterGenre, ratingRange]);
+  const deleteMutation = useDeleteMovie();
+
+  const handleDelete = (movieId: string) => {
+    if (confirm("Are you sure you want to delete this movie?")) {
+      deleteMutation.mutate(movieId);
+    }
+  };
+
+  const handleEdit = (movie: Movie) => {
+    setSelectedMovie(movie);
+    setEditModalOpen(true);
+  };
+
+  const columns = createColumns(handleEdit, handleDelete);
 
   const table = useReactTable({
-    data: filteredData,
+    data: movies,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -289,7 +188,7 @@ const Movies = () => {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex w-[260px] items-center gap-3 rounded-md border border-border bg-transparent px-4 py-3 text-sm text-muted-foreground">
+          <div className="flex w-65 items-center gap-3 rounded-md border border-border bg-transparent px-4 py-3 text-sm text-muted-foreground">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input
               type="search"
@@ -419,6 +318,14 @@ const Movies = () => {
       </div>
 
       <AddMovieModal open={addModalOpen} onOpenChange={setAddModalOpen} />
+      <EditMovieModal 
+        open={editModalOpen} 
+        onOpenChange={setEditModalOpen} 
+        movie={selectedMovie} 
+      />
+
+      {isLoading && <p className="text-muted-foreground">Loading movies...</p>}
+      {error && <p className="text-destructive">Error loading movies</p>}
 
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full text-sm">

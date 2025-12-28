@@ -52,3 +52,16 @@ export interface GetMoviesParams {
 export type MovieListResponse = ApiResponse<MovieListData>;
 
 export type MovieResponse = ApiResponse<Movie>;
+
+export type CreateMovieRequest = {
+  title: string;
+  description: string;
+  releaseDate: string;
+  durationMinutes: number;
+  genre: MovieGenre;
+  posterUrl: string;
+  rating: string;
+  status: MovieStatus;
+};
+
+export type UpdateMovieRequest = Partial<CreateMovieRequest>;

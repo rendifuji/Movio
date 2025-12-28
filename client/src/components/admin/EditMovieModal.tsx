@@ -2,10 +2,11 @@ import {
   useState,
   useRef,
   useCallback,
+  useEffect,
   type DragEvent,
   type ChangeEvent,
 } from "react";
-import { Plus, Upload, X, Calendar, ChevronDown } from "lucide-react";
+import { Upload, X, ChevronDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -26,14 +27,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components";
-import { useAddMovie } from "@/hooks/movie_admin";
-import type { MovieGenre, MovieStatus } from "@/types/movie";
+import { useUpdateMovie } from "@/hooks/movie_admin";
+import type { Movie, MovieGenre, MovieStatus } from "@/types/movie";
 
-type DisplayStatus = "Now Showing" | "Coming Soon";
-
-interface AddMovieModalProps {
+interface EditMovieModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  movie: Movie | null;
 }
 
 const genres: { label: string; value: MovieGenre }[] = [
@@ -49,12 +49,12 @@ const genres: { label: string; value: MovieGenre }[] = [
   { label: "Documentary", value: "DOCUMENTARY" },
 ];
 
-const statuses: { label: DisplayStatus; value: MovieStatus }[] = [
+const statuses: { label: string; value: MovieStatus }[] = [
   { label: "Now Showing", value: "NOW_SHOWING" },
   { label: "Coming Soon", value: "COMING_SOON" },
 ];
 
-const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
+const EditMovieModal = ({ open, onOpenChange, movie }: EditMovieModalProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
@@ -62,36 +62,29 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
   const [selectedGenre, setSelectedGenre] = useState<MovieGenre | "">("");
   const [status, setStatus] = useState<MovieStatus | "">("");
   const [rating, setRating] = useState("");
-  const [posterPreview, setPosterPreview] = useState<string | null>(null);
   const [posterUrl, setPosterUrl] = useState("");
+  const [posterPreview, setPosterPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const addMovieMutation = useAddMovie();
+  const updateMovieMutation = useUpdateMovie();
 
-  const resetForm = useCallback(() => {
-    setTitle("");
-    setDescription("");
-    setReleaseDate("");
-    setDuration("");
-    setSelectedGenre("");
-    setStatus("");
-    setRating("");
-    setPosterPreview(null);
-    setPosterUrl("");
-    setIsDragging(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }, []);
-
-  const handleOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      if (nextOpen) {
-        resetForm();
-      }
-      onOpenChange(nextOpen);
-    },
-    [onOpenChange, resetForm]
-  );
+  // Populate form when movie prop changes
+  useEffect(() => {
+    if (movie) {
+      setTitle(movie.title);
+      setDescription(movie.description);
+      // Format date for input (YYYY-MM-DD)
+      const date = new Date(movie.releaseDate);
+      setReleaseDate(date.toISOString().split("T")[0]);
+      setDuration(movie.durationMinutes.toString());
+      setSelectedGenre(movie.genre);
+      setStatus(movie.status);
+      setRating(movie.rating);
+      setPosterUrl(movie.posterUrl);
+      setPosterPreview(movie.posterUrl);
+    }
+  }, [movie]);
 
   const handleFile = useCallback((file: File | null) => {
     if (!file) return;
@@ -108,7 +101,11 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
     }
 
     const reader = new FileReader();
-    reader.onload = () => setPosterPreview(reader.result as string);
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setPosterPreview(dataUrl);
+      // For now, we still use the URL - file upload would need backend support
+    };
     reader.onerror = (err) => {
       console.error("FileReader error:", err);
       setPosterPreview(null);
@@ -146,33 +143,36 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
 
   const handleRemovePoster = useCallback(() => {
     setPosterPreview(null);
+    setPosterUrl("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
 
   const handleSubmit = async () => {
-    if (!title || !description || !releaseDate || !duration || !selectedGenre || !status || !rating) {
+    if (!movie || !title || !description || !releaseDate || !duration || !selectedGenre || !status || !rating) {
       alert("Please fill in all required fields");
       return;
     }
 
-    // Use posterUrl input or a placeholder for now
-    const finalPosterUrl = posterUrl || "https://via.placeholder.com/300x450";
+    const finalPosterUrl = posterUrl || movie.posterUrl;
 
     try {
-      await addMovieMutation.mutateAsync({
-        title,
-        description,
-        releaseDate: new Date(releaseDate).toISOString(),
-        durationMinutes: parseInt(duration, 10),
-        genre: selectedGenre,
-        posterUrl: finalPosterUrl,
-        rating,
-        status,
+      await updateMovieMutation.mutateAsync({
+        movieId: movie.movieId,
+        data: {
+          title,
+          description,
+          releaseDate: new Date(releaseDate).toISOString(),
+          durationMinutes: parseInt(duration, 10),
+          genre: selectedGenre,
+          posterUrl: finalPosterUrl,
+          rating,
+          status,
+        },
       });
       onOpenChange(false);
     } catch (error) {
-      console.error("Failed to add movie:", error);
-      alert("Failed to add movie. Please try again.");
+      console.error("Failed to update movie:", error);
+      alert("Failed to update movie. Please try again.");
     }
   };
 
@@ -181,10 +181,10 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl p-6" showCloseButton>
         <DialogHeader>
-          <DialogTitle className="text-xl">Add New Movie</DialogTitle>
+          <DialogTitle className="text-xl">Edit Movie</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-6 mt-4">
@@ -217,39 +217,26 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="release-date">Release Date</Label>
-                  <div className="relative">
-                    <Input
-                      id="release-date"
-                      type="date"
-                      placeholder="18/11/2025"
-                      value={releaseDate}
-                      onChange={(e) => setReleaseDate(e.target.value)}
-                      className="pr-10"
-                    />
-                    <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                  </div>
+                  <Input
+                    id="release-date"
+                    type="date"
+                    value={releaseDate}
+                    onChange={(e) => setReleaseDate(e.target.value)}
+                  />
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="duration">Duration</Label>
-                  <div className="relative">
-                    <Input
-                      id="duration"
-                      inputMode="numeric"
-                      placeholder="160m"
-                      value={duration}
-                      onChange={(e) => {
-                        const raw = e.target.value.replace(/\D/g, "");
-                        setDuration(raw);
-                      }}
-                      className={duration ? "pr-8" : ""}
-                    />
-                    {duration && (
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-foreground pointer-events-none select-none">
-                        m
-                      </span>
-                    )}
-                  </div>
+                  <Label htmlFor="duration">Duration (minutes)</Label>
+                  <Input
+                    id="duration"
+                    inputMode="numeric"
+                    placeholder="160"
+                    value={duration}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, "");
+                      setDuration(raw);
+                    }}
+                  />
                 </div>
               </div>
 
@@ -301,12 +288,15 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="poster-url">Poster URL (optional)</Label>
+                  <Label htmlFor="poster-url">Poster URL</Label>
                   <Input
                     id="poster-url"
                     placeholder="https://example.com/poster.jpg"
                     value={posterUrl}
-                    onChange={(e) => setPosterUrl(e.target.value)}
+                    onChange={(e) => {
+                      setPosterUrl(e.target.value);
+                      setPosterPreview(e.target.value);
+                    }}
                   />
                 </div>
               </div>
@@ -362,11 +352,12 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
 
               <Button
                 type="button"
-                className="gap-2 px-12! py-3"
+                variant="outline"
+                className="gap-2 px-6 py-2"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Plus className="size-4" />
-                Select From Device
+                <Upload className="size-4" />
+                Upload New Poster
               </Button>
             </CardContent>
           </Card>
@@ -376,11 +367,16 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Add Movie</Button>
+          <Button 
+            onClick={handleSubmit}
+            disabled={updateMovieMutation.isPending}
+          >
+            {updateMovieMutation.isPending ? "Saving..." : "Save Changes"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
 
-export default AddMovieModal;
+export default EditMovieModal;
