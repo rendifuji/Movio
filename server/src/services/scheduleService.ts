@@ -112,7 +112,8 @@ class ScheduleService {
 		date?: string,
 		page: number = 1,
 		limit: number = 10,
-		sortBy?: string
+		sortBy?: string,
+		movieId?: string
 	) {
 		const [data, totalItems] = await Promise.all([
 			ScheduleRepository.getSchedules(
@@ -122,13 +123,15 @@ class ScheduleService {
 				date,
 				page,
 				limit,
-				sortBy
+				sortBy,
+				movieId
 			),
 			ScheduleRepository.countSchedules(
 				studioName,
 				cinemaName,
 				search,
-				date
+				date,
+				movieId
 			),
 		]);
 

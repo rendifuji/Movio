@@ -15,3 +15,7 @@ export const userMovieRouter: Router = express.Router();
 userMovieRouter.use(AuthMiddleware.authenticateToken);
 userMovieRouter.use(AuthMiddleware.userOrAdmin);
 userMovieRouter.get("/", MovieController.getMovies);
+
+export const publicMovieRouter: Router = express.Router();
+publicMovieRouter.get("/", MovieController.getMovies);
+publicMovieRouter.get("/:movieId", MovieController.getMovieById);

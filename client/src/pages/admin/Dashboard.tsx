@@ -5,119 +5,38 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { Wallet, Ticket, Clapperboard } from "lucide-react";
+import { Wallet, Ticket, Clapperboard, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components";
+import { useAdminDashboard } from "@/hooks/transaction";
+import type { RecentTransaction } from "@/services/transaction";
+import { formatPrice, formatDate, formatStatus } from "@/lib/formatters";
 
-type Transaction = {
-  id: string;
-  movie: string;
-  user: string;
-  date: string;
-  status: "Paid" | "Pending" | "Cancelled";
-};
-
-const stats = [
-  {
-    label: "Total Revenue",
-    value: "Rp12.540.000",
-    icon: Wallet,
-    color: "text-primary",
-    bgColor: "bg-primary/20",
-  },
-  {
-    label: "Tickets Sold",
-    value: "100",
-    icon: Ticket,
-    color: "text-violet-500",
-    bgColor: "bg-violet-500/20",
-  },
-  {
-    label: "Movies Showing",
-    value: "50",
-    icon: Clapperboard,
-    color: "text-amber-400",
-    bgColor: "bg-amber-400/20",
-  },
-];
-
-const transactions: Transaction[] = [
-  {
-    id: "#T-8821",
-    movie: "Zootopia 2",
-    user: "Derry Riccardo",
-    date: "5 December 2025",
-    status: "Paid",
-  },
-  {
-    id: "#T-8821",
-    movie: "Zootopia 2",
-    user: "Derry Riccardo",
-    date: "5 December 2025",
-    status: "Paid",
-  },
-  {
-    id: "#T-8821",
-    movie: "Zootopia 2",
-    user: "Derry Riccardo",
-    date: "5 December 2025",
-    status: "Paid",
-  },
-  {
-    id: "#T-8821",
-    movie: "Zootopia 2",
-    user: "Derry Riccardo",
-    date: "5 December 2025",
-    status: "Paid",
-  },
-  {
-    id: "#T-8821",
-    movie: "Zootopia 2",
-    user: "Derry Riccardo",
-    date: "5 December 2025",
-    status: "Paid",
-  },
-  {
-    id: "#T-8821",
-    movie: "Zootopia 2",
-    user: "Derry Riccardo",
-    date: "5 December 2025",
-    status: "Paid",
-  },
-];
-
-const columnHelper = createColumnHelper<Transaction>();
+const columnHelper = createColumnHelper<RecentTransaction>();
 
 const columns = [
-  columnHelper.accessor("id", {
+  columnHelper.accessor("transactionId", {
     header: "ID",
-    cell: (info) => info.getValue(),
+    cell: (info) => `#${info.getValue().slice(-6).toUpperCase()}`,
   }),
-  columnHelper.accessor("movie", {
+  columnHelper.accessor("movieTitle", {
     header: "Movie",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor("user", {
+  columnHelper.accessor("userName", {
     header: "User",
     cell: (info) => info.getValue(),
   }),
   columnHelper.accessor("date", {
     header: "Date",
-    cell: (info) => info.getValue(),
+    cell: (info) => formatDate(info.getValue()),
   }),
   columnHelper.accessor("status", {
     header: "Status",
     cell: (info) => {
-      const status = info.getValue();
-      const statusStyles: Record<string, string> = {
-        Paid: "bg-green-600 text-white",
-        Pending: "bg-amber-500 text-white",
-        Cancelled: "bg-red-600 text-white",
-      };
+      const { label, style } = formatStatus(info.getValue());
       return (
-        <span
-          className={`rounded-md px-3 py-1 text-xs font-medium ${statusStyles[status]}`}
-        >
-          {status}
+        <span className={`rounded-md px-3 py-1 text-xs font-medium ${style}`}>
+          {label}
         </span>
       );
     },
@@ -125,13 +44,53 @@ const columns = [
 ];
 
 const AdminDashboard = () => {
-  const data = useMemo(() => transactions, []);
+  const { data: dashboardData, isLoading } = useAdminDashboard();
+
+  const transactions = useMemo(
+    () => dashboardData?.recentTransactions ?? [],
+    [dashboardData]
+  );
+
+  const stats = useMemo(
+    () => [
+      {
+        label: "Total Revenue",
+        value: formatPrice(dashboardData?.totalRevenue ?? 0),
+        icon: Wallet,
+        color: "text-primary",
+        bgColor: "bg-primary/20",
+      },
+      {
+        label: "Tickets Sold",
+        value: String(dashboardData?.totalTicketsSold ?? 0),
+        icon: Ticket,
+        color: "text-violet-500",
+        bgColor: "bg-violet-500/20",
+      },
+      {
+        label: "Movies Showing",
+        value: String(dashboardData?.nowShowingMovies ?? 0),
+        icon: Clapperboard,
+        color: "text-amber-400",
+        bgColor: "bg-amber-400/20",
+      },
+    ],
+    [dashboardData]
+  );
 
   const table = useReactTable({
-    data,
+    data: transactions,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -190,21 +149,32 @@ const AdminDashboard = () => {
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b border-border last:border-0"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-6 py-4">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
+              {transactions.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="px-6 py-8 text-center text-muted-foreground"
+                  >
+                    No transactions yet
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="border-b border-border last:border-0"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-6 py-4">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

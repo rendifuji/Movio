@@ -107,7 +107,7 @@ const UserLayout = () => {
         </div>
       </header>
 
-      <main className="flex-1 container">
+      <main className="flex flex-1 w-full overflow-x-hidden">
         <Outlet />
       </main>
     </div>
