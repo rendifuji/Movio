@@ -96,7 +96,7 @@ const AdminLayout = () => {
                 onClick={() => logout()}
                 disabled={isLoggingOut}
                 tooltip="Logout"
-                className="group-data-[collapsible=icon]:px-2 px-4! rounded-none py-6 text-base! text-destructive hover:bg-destructive/10 hover:text-destructive"
+                className="cursor-pointer group-data-[collapsible=icon]:px-2 px-4! rounded-none py-6 text-base! text-destructive hover:bg-destructive/10 hover:text-destructive"
               >
                 <LogOut className="size-6" />
                 <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>

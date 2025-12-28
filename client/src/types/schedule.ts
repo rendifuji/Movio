@@ -3,13 +3,14 @@ import type { ApiResponse } from "./auth";
 export interface Schedule {
   scheduleId: string;
   movieId: string;
-  movieTitle?: string;
+  movieTitle: string;
   cinemaId: string;
-  cinemaName?: string;
+  cinemaName: string;
   studioId: string;
-  studioName?: string;
+  studioName: string;
   date: string;
   startTime: string;
+  endTime?: string;
   price: number;
   createdAt?: string;
   updatedAt?: string;
@@ -18,9 +19,22 @@ export interface Schedule {
 export interface GetSchedulesParams {
   movieId?: string;
   cinemaId?: string;
+  cinemaName?: string;
+  studioName?: string;
+  search?: string;
   date?: string;
   page?: number;
   limit?: number;
+  sortBy?: string;
+}
+
+export interface CreateScheduleRequest {
+  movieId: string;
+  cinemaId: string;
+  studioId: string;
+  date: string;
+  startTime: string;
+  price: number;
 }
 
 export interface ScheduleListData {

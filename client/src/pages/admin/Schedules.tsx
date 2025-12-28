@@ -19,200 +19,174 @@ import {
   Label,
   Slider,
 } from "@/components";
-import { AddScheduleModal } from "@/components/admin";
-
-type Schedule = {
-  id: string;
-  startTime: string;
-  endTime: string;
-  movie: string;
-  cinema: string;
-  studio: string;
-  price: number;
-};
-
-const schedules: Schedule[] = [
-  {
-    id: "1",
-    startTime: "09:30",
-    endTime: "11:45",
-    movie: "Zootopia 2",
-    cinema: "Central Park",
-    studio: "Studio 1",
-    price: 45000,
-  },
-  {
-    id: "2",
-    startTime: "10:15",
-    endTime: "12:30",
-    movie: "The Lighthouse",
-    cinema: "Grand Indonesia",
-    studio: "Studio 2",
-    price: 60000,
-  },
-  {
-    id: "3",
-    startTime: "12:10",
-    endTime: "14:25",
-    movie: "Into the Spider-Verse",
-    cinema: "Plaza Senayan",
-    studio: "Studio 3",
-    price: 55000,
-  },
-  {
-    id: "4",
-    startTime: "13:40",
-    endTime: "16:10",
-    movie: "Dune: Part Two",
-    cinema: "Central Park",
-    studio: "IMAX",
-    price: 90000,
-  },
-  {
-    id: "5",
-    startTime: "14:30",
-    endTime: "17:00",
-    movie: "Zootopia 2",
-    cinema: "Grand Indonesia",
-    studio: "Studio 1",
-    price: 50000,
-  },
-  {
-    id: "6",
-    startTime: "15:20",
-    endTime: "17:35",
-    movie: "Interstellar",
-    cinema: "Plaza Senayan",
-    studio: "Studio 2",
-    price: 65000,
-  },
-  {
-    id: "7",
-    startTime: "17:10",
-    endTime: "19:25",
-    movie: "The Grand Budapest Hotel",
-    cinema: "Central Park",
-    studio: "Studio 3",
-    price: 55000,
-  },
-  {
-    id: "8",
-    startTime: "18:00",
-    endTime: "20:30",
-    movie: "Avengers: Endgame",
-    cinema: "Grand Indonesia",
-    studio: "IMAX",
-    price: 95000,
-  },
-  {
-    id: "9",
-    startTime: "19:40",
-    endTime: "22:10",
-    movie: "Oppenheimer",
-    cinema: "Plaza Senayan",
-    studio: "Studio 1",
-    price: 80000,
-  },
-  {
-    id: "10",
-    startTime: "21:15",
-    endTime: "23:30",
-    movie: "Zootopia 2",
-    cinema: "Central Park",
-    studio: "Studio 2",
-    price: 60000,
-  },
-];
-
-const columnHelper = createColumnHelper<Schedule>();
+import { AddScheduleModal, DeleteScheduleModal } from "@/components/admin";
+import {
+  useAdminSchedules,
+  useCreateSchedule,
+  useDeleteSchedule,
+} from "@/hooks/schedule";
+import { useCinemas } from "@/hooks/cinema/useCinemas";
+import { formatDate, formatTime } from "@/lib/formatters";
+import type { Schedule } from "@/types/schedule";
 
 const formatPrice = (price: number) => {
   return `Rp${price.toLocaleString("id-ID")}`;
 };
 
-const columns = [
-  columnHelper.display({
-    id: "time",
-    header: "Time",
-    cell: ({ row }) => {
-      const schedule = row.original;
-      return (
-        <span>
-          <span className="font-semibold">{schedule.startTime}</span>
-          <span className="text-muted-foreground"> - {schedule.endTime}</span>
-        </span>
-      );
-    },
-  }),
-  columnHelper.accessor("movie", {
-    header: "Movie",
-    cell: (info) => <span className="font-medium">{info.getValue()}</span>,
-  }),
-  columnHelper.display({
-    id: "location",
-    header: "Location",
-    cell: ({ row }) => {
-      const schedule = row.original;
-      return (
-        <span className="text-muted-foreground">
-          {schedule.cinema} • {schedule.studio}
-        </span>
-      );
-    },
-  }),
-  columnHelper.accessor("price", {
-    header: "Price",
-    cell: (info) => formatPrice(info.getValue()),
-  }),
-  columnHelper.display({
-    id: "actions",
-    header: "Actions",
-    cell: () => (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 text-destructive hover:text-destructive"
-      >
-        <Trash2 className="size-4" />
-      </Button>
-    ),
-  }),
-];
-
 const Schedules = () => {
-  const data = useMemo(() => schedules, []);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [scheduleToDelete, setScheduleToDelete] = useState<Schedule | null>(
+    null
+  );
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<string>("");
-  const [filterLocation, setFilterLocation] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("time-asc");
+  const [filterCinema, setFilterCinema] = useState<string>("");
   const [filterStudio, setFilterStudio] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<number[]>([0, 100000]);
+  const [priceRange, setPriceRange] = useState<number[]>([0, 200000]);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const filteredData = useMemo(() => {
-    return data.filter((s) => {
-      const q = search.trim().toLowerCase();
-      const searchOk = !q || s.movie.toLowerCase().includes(q);
-      const locationKey = s.cinema.toLowerCase().replaceAll(" ", "-");
-      const studioKey = s.studio.toLowerCase().replaceAll(" ", "-");
+  const today = new Date().toISOString().split("T")[0];
 
-      const locationOk =
-        !filterLocation ||
-        filterLocation === "all" ||
-        locationKey === filterLocation;
-      const studioOk =
-        !filterStudio || filterStudio === "all" || studioKey === filterStudio;
-      const priceOk = s.price >= priceRange[0] && s.price <= priceRange[1];
+  const { schedules, isLoading } = useAdminSchedules({
+    search: search || undefined,
+    sortBy: sortBy || undefined,
+    cinemaName:
+      filterCinema && filterCinema !== "all" ? filterCinema : undefined,
+    studioName:
+      filterStudio && filterStudio !== "all" ? filterStudio : undefined,
+    date: today, 
+  });
 
-      return searchOk && locationOk && studioOk && priceOk;
+  const { cinemas } = useCinemas({ limit: 100 });
+  const createSchedule = useCreateSchedule();
+  const deleteSchedule = useDeleteSchedule();
+
+  const filteredSchedules = useMemo(() => {
+    return schedules.filter((s) => {
+      return s.price >= priceRange[0] && s.price <= priceRange[1];
     });
-  }, [data, search, filterLocation, filterStudio, priceRange]);
+  }, [schedules, priceRange]);
+
+  const uniqueStudios = useMemo(() => {
+    const studios = new Set<string>();
+    schedules.forEach((s) => {
+      if (s.studioName) {
+        studios.add(s.studioName);
+      }
+    });
+    return Array.from(studios).sort();
+  }, [schedules]);
+
+  const columnHelper = createColumnHelper<Schedule>();
+
+  const columns = [
+    columnHelper.display({
+      id: "date",
+      header: "Date",
+      cell: ({ row }) => {
+        const schedule = row.original;
+        return (
+          <span className="text-muted-foreground">
+            {formatDate(schedule.date)}
+          </span>
+        );
+      },
+    }),
+    columnHelper.display({
+      id: "time",
+      header: "Time",
+      cell: ({ row }) => {
+        const schedule = row.original;
+        return (
+          <span>
+            <span className="font-semibold">
+              {formatTime(schedule.startTime)}
+            </span>
+            {schedule.endTime && (
+              <span className="text-muted-foreground">
+                {" "}
+                - {formatTime(schedule.endTime)}
+              </span>
+            )}
+          </span>
+        );
+      },
+    }),
+    columnHelper.display({
+      id: "movie",
+      header: "Movie",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.movieTitle || "—"}</span>
+      ),
+    }),
+    columnHelper.display({
+      id: "location",
+      header: "Location",
+      cell: ({ row }) => {
+        const schedule = row.original;
+        return (
+          <span className="text-muted-foreground">
+            {schedule.cinemaName} • {schedule.studioName}
+          </span>
+        );
+      },
+    }),
+    columnHelper.accessor("price", {
+      header: "Price",
+      cell: (info) => formatPrice(info.getValue()),
+    }),
+    columnHelper.display({
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:text-destructive"
+          onClick={() => {
+            setScheduleToDelete(row.original);
+            setDeleteModalOpen(true);
+          }}
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      ),
+    }),
+  ];
 
   const table = useReactTable({
-    data: filteredData,
+    data: filteredSchedules,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const handleCreateSchedule = async (data: {
+    movieId: string;
+    cinemaId: string;
+    studioId: string;
+    date: string;
+    startTime: string;
+    price: number;
+  }) => {
+    try {
+      await createSchedule.mutateAsync(data);
+      setAddModalOpen(false);
+    } catch (error) {
+      console.error("Failed to create schedule:", error);
+    }
+  };
+
+  const handleDeleteSchedule = async () => {
+    if (!scheduleToDelete) return;
+    try {
+      await deleteSchedule.mutateAsync(scheduleToDelete.scheduleId);
+      setDeleteModalOpen(false);
+      setScheduleToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete schedule:", error);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -240,9 +214,8 @@ const Schedules = () => {
             <SelectContent>
               <SelectItem value="time-asc">Time (Earliest)</SelectItem>
               <SelectItem value="time-desc">Time (Latest)</SelectItem>
-              <SelectItem value="price-asc">Price (Low to High)</SelectItem>
-              <SelectItem value="price-desc">Price (High to Low)</SelectItem>
-              <SelectItem value="movie">Movie Name</SelectItem>
+              <SelectItem value="date-asc">Date (Earliest)</SelectItem>
+              <SelectItem value="date-desc">Date (Latest)</SelectItem>
             </SelectContent>
           </Select>
 
@@ -261,24 +234,19 @@ const Schedules = () => {
                 <h4 className="font-medium">Filters</h4>
 
                 <div className="flex flex-col gap-3">
-                  <Label>Location</Label>
-                  <Select
-                    value={filterLocation}
-                    onValueChange={setFilterLocation}
-                  >
+                  <Label>Cinema</Label>
+                  <Select value={filterCinema} onValueChange={setFilterCinema}>
                     <SelectTrigger className="w-full border border-border py-3 h-auto! px-4 gap-16 cursor-pointer">
-                      <SelectValue placeholder="Select location" />
+                      <SelectValue placeholder="Select cinema" />
                       <ChevronDown className="size-4 ml-auto opacity-50" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Locations</SelectItem>
-                      <SelectItem value="central-park">Central Park</SelectItem>
-                      <SelectItem value="grand-indonesia">
-                        Grand Indonesia
-                      </SelectItem>
-                      <SelectItem value="plaza-senayan">
-                        Plaza Senayan
-                      </SelectItem>
+                      <SelectItem value="all">All Cinemas</SelectItem>
+                      {cinemas.map((c) => (
+                        <SelectItem key={c.cinemaId} value={c.name}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -292,10 +260,11 @@ const Schedules = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Studios</SelectItem>
-                      <SelectItem value="studio-1">Studio 1</SelectItem>
-                      <SelectItem value="studio-2">Studio 2</SelectItem>
-                      <SelectItem value="studio-3">Studio 3</SelectItem>
-                      <SelectItem value="imax">IMAX</SelectItem>
+                      {uniqueStudios.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -321,7 +290,7 @@ const Schedules = () => {
                     variant="outline"
                     className="flex-1"
                     onClick={() => {
-                      setFilterLocation("");
+                      setFilterCinema("");
                       setFilterStudio("");
                       setPriceRange([0, 200000]);
                     }}
@@ -351,7 +320,26 @@ const Schedules = () => {
         </Button>
       </div>
 
-      <AddScheduleModal open={addModalOpen} onOpenChange={setAddModalOpen} />
+      <AddScheduleModal
+        open={addModalOpen}
+        onOpenChange={setAddModalOpen}
+        onSubmit={handleCreateSchedule}
+        isSubmitting={createSchedule.isPending}
+      />
+
+      <DeleteScheduleModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        onConfirm={handleDeleteSchedule}
+        isDeleting={deleteSchedule.isPending}
+        scheduleName={
+          scheduleToDelete
+            ? `${scheduleToDelete.movieTitle || "Unknown"} - ${formatDate(
+                scheduleToDelete.date
+              )} ${formatTime(scheduleToDelete.startTime)}`
+            : ""
+        }
+      />
 
       <div className="overflow-x-auto rounded-md border border-border">
         <table className="w-full text-sm">
@@ -375,15 +363,41 @@ const Schedules = () => {
             ))}
           </thead>
           <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-b border-border last:border-0">
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-6 py-4">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="px-6 py-12 text-center text-muted-foreground"
+                >
+                  Loading schedules...
+                </td>
               </tr>
-            ))}
+            ) : filteredSchedules.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="px-6 py-12 text-center text-muted-foreground"
+                >
+                  No schedules found
+                </td>
+              </tr>
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b border-border last:border-0"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="px-6 py-4">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
