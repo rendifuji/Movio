@@ -93,24 +93,21 @@ const Movies = () => {
   const [page, setPage] = useState(1);
   const limit = 10;
 
-  // Memoize params to ensure query stability
   const queryParams = useMemo(() => ({
     page,
     limit,
     search: search || undefined,
     sortBy: sortBy || undefined,
     status: filterStatus && filterStatus !== "all"
-      ? (filterStatus === "now-showing" ? "NOW_SHOWING" : "COMING_SOON")
+      ? (filterStatus === "now-showing" ? "NOW_SHOWING" : "COMING_SOON" as ApiMovieStatus)
       : undefined,
     genre: filterGenre && filterGenre !== "all"
       ? (filterGenre.toUpperCase().replace("-", "_") as MovieGenre)
       : undefined,
   }), [page, limit, search, sortBy, filterStatus, filterGenre]);
 
-  // Fetch movies from API with filters
   const { movies: fetchedMovies, metadata, isLoading } = useMovies(queryParams);
   
-  // Memoize data to prevent table re-renders on every render if data hasn't changed
   const movies = useMemo(() => fetchedMovies ?? [], [fetchedMovies]);
 
   const deleteMutation = useDeleteMovie();
