@@ -14,26 +14,15 @@ import {
 } from "lucide-react";
 import { CountdownTimer } from "@/components";
 import { useSeatLockContext } from "@/contexts";
-import { formatDuration, formatGenre, formatTimeRange } from "@/lib/formatters";
+import {
+  formatDuration,
+  formatGenre,
+  formatTimeRange,
+  formatDate,
+  formatPrice,
+} from "@/lib/formatters";
 import { transactionService } from "@/services/transaction";
 import { isAxiosError } from "axios";
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("id-ID", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
-
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -180,7 +169,7 @@ const Checkout = () => {
                 <span className="text-muted-foreground">Price/Seat</span>
                 <div className="flex-1 border-t border-dashed border-border/40" />
                 <span className="font-medium text-foreground">
-                  Rp {formatCurrency(lockData.price)}
+                  {formatPrice(lockData.price)}
                 </span>
               </div>
 
@@ -193,7 +182,7 @@ const Checkout = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-semibold text-primary">
-                    Rp {formatCurrency(totalPrice)}
+                    {formatPrice(totalPrice)}
                   </div>
                   <span className="text-xs text-muted-foreground">
                     Tax Included
