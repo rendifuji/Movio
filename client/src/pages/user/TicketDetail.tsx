@@ -3,44 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, Film, Calendar, Download, Loader2 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { useTicketDetail } from "@/hooks/transaction";
-
-const formatDuration = (minutes: number): string => {
-	const h = Math.floor(minutes / 60);
-	const m = minutes % 60;
-	return `${h}h ${m}m`;
-};
-
-const formatDate = (dateStr: string): string => {
-	const date = new Date(dateStr);
-	return date.toLocaleDateString("en-GB", {
-		day: "numeric",
-		month: "long",
-		year: "numeric",
-	});
-};
-
-const formatTime = (timeStr: string): string => {
-	const date = new Date(timeStr);
-	return date.toLocaleTimeString("en-GB", {
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false,
-	});
-};
-
-const formatGenre = (genre: string): string => {
-	return genre
-		.split("_")
-		.map((w) => w.charAt(0) + w.slice(1).toLowerCase())
-		.join(" ");
-};
+import { formatDuration, formatDate, formatTime, formatGenre } from "@/lib/formatters";
 
 const TicketPage: React.FC = () => {
 	const { ticketId } = useParams<{ ticketId: string }>();
 	const navigate = useNavigate();
 	const { ticket, isLoading, error } = useTicketDetail(ticketId);
 
-	// Generate a unique QR code value based on ticket ID and additional data
 	const qrCodeValue = ticket
 		? JSON.stringify({
 				ticketId: ticket.ticketId,
@@ -75,7 +44,7 @@ const TicketPage: React.FC = () => {
 	}
 
 	return (
-		<div className="min-h-screen bg-[#020410] flex items-center justify-center font-sans text-white">
+		<div className="flex-1 bg-[#020410] flex items-center justify-center font-sans text-white">
 			<div className="w-full max-w-4xl">
 				<button
 					onClick={() => navigate(-1)}

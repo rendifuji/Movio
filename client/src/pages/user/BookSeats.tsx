@@ -23,7 +23,12 @@ import { useSchedules } from "@/hooks/schedule/useSchedules";
 import { useSeats } from "@/hooks/seat/useSeats";
 import { useCinemas } from "@/hooks/cinema/useCinemas";
 import { useSeatLockContext } from "@/contexts";
-import { formatDuration, formatGenre, formatTimeRange } from "@/lib/formatters";
+import {
+  formatDuration,
+  formatGenre,
+  formatTimeRange,
+  formatPrice,
+} from "@/lib/formatters";
 import type { AuthUser } from "@/types/auth";
 
 const generateDates = () => {
@@ -428,11 +433,10 @@ const BookSeats = () => {
           <div className="flex items-center gap-6">
             <div className="flex flex-col text-right">
               <span className="text-lg font-bold">
-                Total: Rp {total.toLocaleString("id-ID")}
+                Total: {formatPrice(total)}
               </span>
               <span className="text-xs text-muted-foreground">
-                {selectedSeats.length} x Rp{" "}
-                {TICKET_PRICE.toLocaleString("id-ID")}
+                {selectedSeats.length} x {formatPrice(TICKET_PRICE)}
               </span>
             </div>
             <Button
