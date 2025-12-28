@@ -55,3 +55,21 @@ export const formatTimeRange = (
 
   return `${format(start)} - ${format(end)}`;
 };
+
+export const formatPrice = (amount: number = 0) => {
+  return `Rp${amount.toLocaleString("id-ID")}`;
+};
+
+export const formatStatus = (status?: string) => {
+  const map: Record<string, { label: string; style: string }> = {
+    SUCCESS: { label: "Paid", style: "bg-green-600 text-white" },
+    PENDING: { label: "Pending", style: "bg-amber-500 text-white" },
+    FAILED: { label: "Failed", style: "bg-red-600 text-white" },
+  };
+  return (
+    map[status ?? ""] || {
+      label: status ?? "Unknown",
+      style: "bg-gray-500 text-white",
+    }
+  );
+};

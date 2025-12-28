@@ -46,9 +46,25 @@ export interface TransactionData {
   }>;
 }
 
+export interface RecentTransaction {
+  transactionId: string;
+  movieTitle: string;
+  userName: string;
+  date: string;
+  status: "SUCCESS" | "PENDING" | "FAILED";
+}
+
+export interface DashboardData {
+  totalRevenue: number;
+  totalTicketsSold: number;
+  nowShowingMovies: number;
+  recentTransactions: RecentTransaction[];
+}
+
 export type CheckoutResponse = ApiResponse<TransactionData>;
 export type TicketResponse = ApiResponse<TicketData>;
 export type TicketsListResponse = ApiResponse<TicketSummary[]>;
+export type DashboardResponse = ApiResponse<DashboardData>;
 
 export const transactionService = {
   checkout: (data: CheckoutRequest) =>
@@ -58,4 +74,8 @@ export const transactionService = {
     API.get<TicketResponse>(`/transaction/user/ticket/${ticketId}`),
 
   getMyTickets: () => API.get<TicketsListResponse>("/transaction/user/ticket"),
+
+  // Admin methods
+  getAdminDashboard: () =>
+    API.get<DashboardResponse>("/transaction/admin/dashboard"),
 };

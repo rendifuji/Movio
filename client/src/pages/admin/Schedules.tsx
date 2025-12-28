@@ -26,12 +26,8 @@ import {
   useDeleteSchedule,
 } from "@/hooks/schedule";
 import { useCinemas } from "@/hooks/cinema/useCinemas";
-import { formatDate, formatTime } from "@/lib/formatters";
+import { formatDate, formatTime, formatPrice } from "@/lib/formatters";
 import type { Schedule } from "@/types/schedule";
-
-const formatPrice = (price: number) => {
-  return `Rp${price.toLocaleString("id-ID")}`;
-};
 
 const Schedules = () => {
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -55,7 +51,7 @@ const Schedules = () => {
       filterCinema && filterCinema !== "all" ? filterCinema : undefined,
     studioName:
       filterStudio && filterStudio !== "all" ? filterStudio : undefined,
-    date: today, 
+    date: today,
   });
 
   const { cinemas } = useCinemas({ limit: 100 });
