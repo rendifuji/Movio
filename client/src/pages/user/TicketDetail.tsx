@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Clock, Film, Calendar, Download, Loader2 } from "lucide-react";
 import QRCode from "react-qr-code";
@@ -51,6 +51,40 @@ const TicketPage: React.FC = () => {
 				qrCode: ticket.qrCode,
 		  })
 		: ticketId ?? "";
+
+	const qrRef = useRef<HTMLDivElement>(null);
+
+	const handleDownload = useCallback(() => {
+		const svg = qrRef.current?.querySelector("svg");
+		if (!svg) return;
+
+		const svgData = new XMLSerializer().serializeToString(svg);
+		const canvas = document.createElement("canvas");
+		const ctx = canvas.getContext("2d");
+		const img = new Image();
+
+		const size = 300;
+		canvas.width = size;
+		canvas.height = size;
+
+		img.onload = () => {
+			if (ctx) {
+				ctx.fillStyle = "#FFFFFF";
+				ctx.fillRect(0, 0, size, size);
+				ctx.drawImage(img, 0, 0, size, size);
+
+				const pngUrl = canvas.toDataURL("image/png");
+				const downloadLink = document.createElement("a");
+				downloadLink.href = pngUrl;
+				downloadLink.download = `ticket-${ticket?.ticketId || "qr"}.png`;
+				document.body.appendChild(downloadLink);
+				downloadLink.click();
+				document.body.removeChild(downloadLink);
+			}
+		};
+
+		img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+	}, [ticket?.ticketId]);
 
 	if (isLoading) {
 		return (
@@ -137,7 +171,7 @@ const TicketPage: React.FC = () => {
 					<div className="hidden md:block w-px bg-gray-700 my-10"></div>
 
 					<div className="w-full md:w-1/2 p-8 md:p-12 bg-[#0B1221] flex flex-col items-center justify-center gap-8">
-						<div className="h-full relative bg-white flex justify-center items-center rounded p-2">
+						<div ref={qrRef} className="h-full relative bg-white flex justify-center items-center rounded p-2">
 							<QRCode
 								value={qrCodeValue}
 								size={260}
@@ -149,7 +183,10 @@ const TicketPage: React.FC = () => {
 							/>
 						</div>
 
-						<button className="flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white px-8 py-3 rounded-lg font-medium transition-all shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_25px_rgba(59,130,246,0.8)]">
+						<button 
+							onClick={handleDownload}
+							className="flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white px-8 py-3 rounded-lg font-medium transition-all shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_25px_rgba(59,130,246,0.8)]"
+						>
 							<Download className="w-5 h-5" />
 							Download
 						</button>
