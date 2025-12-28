@@ -2,7 +2,6 @@ import {
   useState,
   useRef,
   useCallback,
-  useEffect,
   type DragEvent,
   type ChangeEvent,
 } from "react";
@@ -69,12 +68,10 @@ const EditMovieModal = ({ open, onOpenChange, movie }: EditMovieModalProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const updateMovieMutation = useUpdateMovie();
 
-  // Populate form when movie prop changes
-  useEffect(() => {
+  const resetForm = useCallback(() => {
     if (movie) {
       setTitle(movie.title);
       setDescription(movie.description);
-      // Format date for input (YYYY-MM-DD)
       const date = new Date(movie.releaseDate);
       setReleaseDate(date.toISOString().split("T")[0]);
       setDuration(movie.durationMinutes.toString());
@@ -85,6 +82,16 @@ const EditMovieModal = ({ open, onOpenChange, movie }: EditMovieModalProps) => {
       setPosterPreview(movie.posterUrl);
     }
   }, [movie]);
+
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        resetForm();
+      }
+      onOpenChange(nextOpen);
+    },
+    [onOpenChange, resetForm]
+  );
 
   const handleFile = useCallback((file: File | null) => {
     if (!file) return;
@@ -181,7 +188,7 @@ const EditMovieModal = ({ open, onOpenChange, movie }: EditMovieModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-4xl p-6" showCloseButton>
         <DialogHeader>
           <DialogTitle className="text-xl">Edit Movie</DialogTitle>

@@ -155,8 +155,7 @@ const AddMovieModal = ({ open, onOpenChange }: AddMovieModalProps) => {
       return;
     }
 
-    // Use posterUrl input or a placeholder for now
-    const finalPosterUrl = posterUrl || "https://via.placeholder.com/300x450";
+    const finalPosterUrl = posterUrl;
 
     try {
       await addMovieMutation.mutateAsync({
